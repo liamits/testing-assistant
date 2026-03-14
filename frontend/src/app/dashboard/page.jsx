@@ -31,8 +31,8 @@ export default function DashboardPage() {
       <main className="flex-1 overflow-y-auto p-8">
         <header className="flex justify-between items-center mb-10">
           <div>
-            <h1 className="text-3xl font-bold">Welcome back, {user?.name || "User"}!</h1>
-            <p className="text-gray-400 mt-1">Here's what's happening with your projects today.</p>
+            <h1 className="text-3xl font-bold text-high-contrast">Welcome back, {user?.name || "User"}!</h1>
+            <p className="text-muted-contrast mt-1 text-lg">Here's what's happening with your projects today.</p>
           </div>
           <button className="btn-primary flex items-center gap-2">
             <Plus size={18} /> New Project
@@ -46,44 +46,44 @@ export default function DashboardPage() {
               <span className="p-3 bg-blue-500/20 rounded-xl text-blue-400">
                 <FolderKanban size={24} />
               </span>
-              <span className="text-gray-400 text-sm">Total Projects</span>
+              <span className="text-muted-contrast text-sm font-medium">Total Projects</span>
             </div>
-            <div className="text-3xl font-bold">12</div>
+            <div className="text-4xl font-extrabold text-high-contrast">12</div>
           </div>
           <div className="glass p-6">
             <div className="flex items-center justify-between mb-4">
               <span className="p-3 bg-purple-500/20 rounded-xl text-purple-400">
                 <FlaskConical size={24} />
               </span>
-              <span className="text-gray-400 text-sm">Active Test Cases</span>
+              <span className="text-muted-contrast text-sm font-medium">Active Test Cases</span>
             </div>
-            <div className="text-3xl font-bold">458</div>
+            <div className="text-4xl font-extrabold text-high-contrast">458</div>
           </div>
           <div className="glass p-6">
             <div className="flex items-center justify-between mb-4">
               <span className="p-3 bg-green-500/20 rounded-xl text-green-400">
                 <History size={24} />
               </span>
-              <span className="text-gray-400 text-sm">Successful Runs</span>
+              <span className="text-muted-contrast text-sm font-medium">Successful Runs</span>
             </div>
-            <div className="text-3xl font-bold">89%</div>
+            <div className="text-4xl font-extrabold text-high-contrast">89%</div>
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="glass p-6">
-          <h2 className="text-xl font-semibold mb-6">Recent Activity</h2>
+        <div className="glass p-8">
+          <h2 className="text-2xl font-bold text-high-contrast mb-8">Recent Activity</h2>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/5">
-                <div className="flex items-center gap-4">
-                  <div className={`w-3 h-3 rounded-full ${i === 2 ? 'bg-red-500' : 'bg-green-500'}`} />
+              <div key={i} className="flex items-center justify-between p-5 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+                <div className="flex items-center gap-5">
+                  <div className={`w-3.5 h-3.5 rounded-full shadow-lg ${i === 2 ? 'bg-red-500 shadow-red-500/50' : 'bg-green-500 shadow-green-500/50'}`} />
                   <div>
-                    <div className="font-medium">Test Run #{i}245 - E-commerce App</div>
-                    <div className="text-sm text-gray-500">2 hours ago</div>
+                    <div className="font-semibold text-high-contrast text-lg">Test Run #{i}245 - E-commerce App</div>
+                    <div className="text-sm text-muted-contrast">2 hours ago</div>
                   </div>
                 </div>
-                <button className="text-gray-400 hover:text-white underline text-sm">View details</button>
+                <button className="text-blue-400 hover:text-blue-300 font-medium underline-offset-4 hover:underline transition-all">View details</button>
               </div>
             ))}
           </div>

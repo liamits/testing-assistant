@@ -7,12 +7,17 @@
 :root {
   --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
   --btn-gradient: linear-gradient(to right, #a855f7, #6366f1);
+  --bg-dark: #0f172a;
+  --bg-glass: rgba(30, 41, 59, 0.7);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-glass: rgba(255, 255, 255, 0.1);
 }
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   overflow: hidden;
-  background: #f8fafc;
+  background: var(--bg-dark);
 }
 
 /* Base Animations */
@@ -170,4 +175,35 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+}
+
+.text-high-contrast {
+  color: var(--text-primary);
+}
+
+.text-muted-contrast {
+  color: var(--text-secondary);
+}
+
+.btn-primary {
+  background: var(--btn-gradient);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(168, 85, 247, 0.4);
 }
