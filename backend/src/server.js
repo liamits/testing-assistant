@@ -2,8 +2,12 @@ import app from "./app.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
+import connectDB from "./config/db.js";
 
 dotenv.config();
+
+// Connect to MongoDB
+connectDB();
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {

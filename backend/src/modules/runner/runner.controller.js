@@ -1,4 +1,5 @@
-import prisma from "../../config/db.js";
+import { TestRun } from "../../models/TestRun.js";
+import { TestCase } from "../../models/TestCase.js";
 import { runActionsWithPlaywright } from "./playwright.service.js";
 import { parseInstructionToActions } from "../ai/manual-agent.service.js";
 import { io } from "../../server.js";
@@ -7,54 +8,56 @@ export const startRun = async (req, res, next) => {
   try {
     const { projectId, testCaseIds, sessionId } = req.body;
 
-    // Create TestRun record
-    const run = await prisma.testRun.create({
-      data: {
-        name: `Run ${new Date().toLocaleString("vi-VN")}`,
-        projectId,
-        status: "RUNNING",
-        items: {
-          create: testCaseIds.map((id) => ({ testCaseId: id, status: "PENDING" }))
-        }
-      },
-      include: { items: { include: { testCase: true } } }
+    const run = await TestRun.create({
+      name: `Run ${new Date().toLocaleString("vi-VN")}`,
+      projectId,
+      status: "RUNNING",
+      results: testCaseIds.map((id) => ({ testCaseId: id, status: "SKIPPED" }))
     });
 
-    // Run async — don't await, stream via socket
+    // Run async
     (async () => {
-      for (const item of run.items) {
-        const tc = item.testCase;
-        const actions = await parseInstructionToActions(
-          tc.steps.join(". ")
-        );
-        const results = await runActionsWithPlaywright(actions, io, sessionId);
-        const passed = results.every((r) => r.status === "passed");
+      try {
+        const testCases = await TestCase.find({ _id: { $in: testCaseIds } });
+        
+        for (let i = 0; i < testCases.length; i++) {
+          const tc = testCases[i];
+          const actions = await parseInstructionToActions(
+            tc.steps.map(s => s.action).join(". ")
+          );
+          const results = await runActionsWithPlaywright(actions, io, sessionId);
+          const passed = results.every((r) => r.status === "passed");
 
-        await prisma.testRunItem.update({
-          where: { id: item.id },
-          data: {
-            status: passed ? "PASSED" : "FAILED",
-            log: JSON.stringify(results)
-          }
+          // Update result in array
+          await TestRun.updateOne(
+            { _id: run._id, "results.testCaseId": tc._id },
+            { 
+              $set: { 
+                "results.$.status": passed ? "PASS" : "FAIL",
+                "results.$.log": JSON.stringify(results)
+              } 
+            }
+          );
+        }
+        
+        await TestRun.findByIdAndUpdate(run._id, { 
+          status: "COMPLETED", 
+          finishedAt: new Date() 
         });
+        io?.to(sessionId).emit("run:complete", { runId: run._id });
+      } catch (err) {
+        console.error("Run error:", err);
+        await TestRun.findByIdAndUpdate(run._id, { status: "FAILED" });
       }
-      await prisma.testRun.update({
-        where: { id: run.id },
-        data: { status: "PASSED", finishedAt: new Date() }
-      });
-      io?.to(sessionId).emit("run:complete", { runId: run.id });
     })();
 
-    res.json({ runId: run.id, message: "Run started" });
+    res.json({ runId: run._id, message: "Run started" });
   } catch (err) { next(err); }
 };
 
 export const getRunResult = async (req, res, next) => {
   try {
-    const run = await prisma.testRun.findUnique({
-      where: { id: req.params.runId },
-      include: { items: { include: { testCase: true } } }
-    });
+    const run = await TestRun.findById(req.params.runId).populate("results.testCaseId");
     if (!run) return res.status(404).json({ message: "Run not found" });
     res.json(run);
   } catch (err) { next(err); }
