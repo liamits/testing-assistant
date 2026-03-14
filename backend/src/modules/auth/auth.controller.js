@@ -1,5 +1,5 @@
 import { registerUser, loginUser } from "./auth.service.js";
-import prisma from "../../config/db.js";
+import { User } from "../../models/User.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -10,17 +10,15 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const result = await loginUser(req.body);
+    const { identifier, password } = req.body;
+    const result = await loginUser({ identifier, password });
     res.json(result);
   } catch (err) { next(err); }
 };
 
 export const getMe = async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { id: true, name: true, email: true, createdAt: true }
-    });
+    const user = await User.findById(req.user.id).select("-password -__v");
     res.json(user);
   } catch (err) { next(err); }
 };

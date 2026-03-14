@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useAuthStore } from "../../../lib/store";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { User, Lock, Loader2, Smartphone } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
@@ -15,58 +16,102 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login({ email, password });
-      toast.success("Welcome back!");
+      await login({ identifier, password });
+      toast.success("Login successful!");
       router.push("/dashboard");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed");
+      toast.error(err.response?.data?.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-[#0b0e14]">
-      <div className="glass w-full max-w-md p-8 shadow-2xl">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-            Testing Assistant
-          </h1>
-          <p className="text-gray-400 mt-2">Sign in to manage your tests</p>
+    <div className="login-container animate-fade">
+      <div className="login-card animate-slide">
+        {/* Left Side: Gradient + Simplified Branding */}
+        <div className="login-left relative">
+          <div className="circle-decoration"></div>
+          <div className="shape shape-1"></div>
+          <div className="shape shape-2"></div>
+          <div className="shape shape-3"></div>
+          <div className="shape shape-4"></div>
+          
+          <div className="z-10 animate-slide" style={{ animationDelay: '0.2s' }}>
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-md border border-white/30">
+                <Smartphone className="text-white" size={32} />
+            </div>
+            <h1 className="text-5xl font-extrabold tracking-tight leading-tight">
+              Welcome to <br /> 
+              <span className="text-white/90">Testing assistant</span>
+            </h1>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-            <input
-              type="email"
-              className="input-field"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+        {/* Right Side: Enhanced Form */}
+        <div className="login-right">
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">User Login</h2>
+            <p className="text-gray-500 text-sm">Please enter your credentials to continue</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
-            <input
-              type="password"
-              className="input-field"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full py-3 text-lg font-semibold"
-          >
-            {loading ? "Authenticating..." : "Login"}
-          </button>
-        </form>
 
-        <div className="mt-8 text-center text-gray-400">
-          Don't have an account? <a href="/register" className="text-blue-400 hover:underline">Sign up</a>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-600 block transition-all">Username</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors">
+                  <User size={20} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter username"
+                  className="input-field-custom"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-600 block transition-all">Password</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors">
+                  <Lock size={20} />
+                </div>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className="input-field-custom"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between py-2">
+              <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer hover:text-gray-700 transition-colors">
+                <input type="checkbox" className="custom-checkbox" />
+                Remember me
+              </label>
+              <a href="#" className="text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors">Forgot password?</a>
+            </div>
+
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-login flex items-center justify-center gap-2 group"
+              >
+                {loading ? <Loader2 className="animate-spin" size={20} /> : "LOGIN"}
+              </button>
+            </div>
+          </form>
+
+          <p className="mt-8 text-center text-sm text-gray-400 font-medium">
+            Designed for testing excellence
+          </p>
         </div>
       </div>
     </div>
