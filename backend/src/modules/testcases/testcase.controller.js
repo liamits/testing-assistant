@@ -83,6 +83,8 @@ export const bulkCreateTestCases = async (req, res, next) => {
 
 export const updateTestCase = async (req, res, next) => {
   try {
+    console.log("Updating test case ID:", req.params.id);
+    console.log("Update body:", req.body);
     const updateData = { ...req.body };
     if (req.file) {
       updateData.screenshotUrl = `/uploads/testcases/${req.file.filename}`;

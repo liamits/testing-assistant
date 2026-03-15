@@ -1,0 +1,15 @@
+﻿--- PROJECTS (1) ---
+Project ID: 69b5fb35f2941fa0f0a2990d, Name: herokuapp
+
+--- TEST CASES (11) ---
+TC ID: 69b61705ce7626e10273350e, Title: Standard login with valid credentials successful, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b61705ce7626e102733513, Title: Login using email address as username successful, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b61705ce7626e102733518, Title: Login with 'Remember Me' enabled successful, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b65e93e109b754dab3106a, Title: Edit record successful, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b65e93e109b754dab3106e, Title: Delete record successful, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b66201e872c7ba1b637fd3, Title: Standard page navigation and button interaction successful, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b66201e872c7ba1b637fd6, Title: UI element accessibility and action execution successful, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b66674e872c7ba1b638502, Title: Login Case Edited, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b66680e872c7ba1b638504, Title: Standard user login successful, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b66680e872c7ba1b638508, Title: Login via keyboard Enter key successful, ProjectID: 69b5fb35f2941fa0f0a2990d
+TC ID: 69b66680e872c7ba1b63850c, Title: Login with case-insensitive username successful, ProjectID: 69b5fb35f2941fa0f0a2990d
