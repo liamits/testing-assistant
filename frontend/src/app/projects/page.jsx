@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FolderKanban, MoreVertical, Plus, Search, Filter, Trash2, Edit } from "lucide-react";
 import api from "../../lib/api";
+import { toast } from "react-hot-toast";
 import CreateProjectModal from "../../components/projects/CreateProjectModal";
 import EditProjectModal from "../../components/projects/EditProjectModal";
 
@@ -32,13 +33,15 @@ export default function ProjectsPage() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this project? This will remove all associated test cases.")) return;
+    console.log("handleDelete initiated for project ID:", id);
     try {
-      await api.delete(`/projects/${id}`);
+      console.log("Calling API to delete project:", id);
+      const res = await api.delete(`/projects/${id}`);
+      console.log("Delete response:", res.data);
       toast.success("Project deleted");
       fetchProjects();
     } catch (err) {
-      console.error(err);
+      console.error("Delete error:", err);
       toast.error("Failed to delete project");
     }
   };

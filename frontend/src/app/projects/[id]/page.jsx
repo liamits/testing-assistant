@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, MoreVertical } from "lucide-react";
+import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, MoreVertical, Trash2 } from "lucide-react";
 import api from "../../../lib/api";
 import { toast } from "react-hot-toast";
 import AddTestCaseModal from "../../../components/testcases/AddTestCaseModal";
@@ -43,6 +43,20 @@ export default function ProjectDetailsPage() {
     setIsModalOpen(true);
   };
 
+  const handleDelete = async () => {
+    console.log("handleDelete initiated for project ID:", id);
+    try {
+      console.log("Calling API to delete project:", id);
+      const res = await api.delete(`/projects/${id}`);
+      console.log("Delete response:", res.data);
+      toast.success("Project deleted");
+      router.push("/projects");
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("Failed to delete project");
+    }
+  };
+
   const happyCases = testCases.filter(tc => tc.category === 'happy' && !tc.parentId);
   const unhappyCases = testCases.filter(tc => tc.category === 'unhappy' && !tc.parentId);
 
@@ -56,6 +70,9 @@ export default function ProjectDetailsPage() {
           <p className="text-muted-contrast max-w-2xl">{project?.description}</p>
         </div>
         <div className="flex gap-4">
+           <button onClick={handleDelete} className="px-4 py-2 rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-colors flex items-center gap-2 font-bold uppercase text-sm">
+            <Trash2 size={18} /> Delete Project
+          </button>
            <button className="btn-secondary flex items-center gap-2">
             <Play size={18} /> Run All Tests
           </button>
