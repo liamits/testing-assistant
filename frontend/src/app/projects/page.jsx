@@ -1,15 +1,19 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FolderKanban, MoreVertical, Plus, Search, Filter } from "lucide-react";
+import { FolderKanban, MoreVertical, Plus, Search, Filter, Trash2, Edit } from "lucide-react";
 import api from "../../lib/api";
 import CreateProjectModal from "../../components/projects/CreateProjectModal";
+import EditProjectModal from "../../components/projects/EditProjectModal";
 
 export default function ProjectsPage() {
   const router = useRouter();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
 
   const fetchProjects = async () => {
     try {
@@ -26,6 +30,24 @@ export default function ProjectsPage() {
   useEffect(() => {
     fetchProjects();
   }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this project? This will remove all associated test cases.")) return;
+    try {
+      await api.delete(`/projects/${id}`);
+      toast.success("Project deleted");
+      fetchProjects();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete project");
+    }
+  };
+
+  const handleEdit = (project) => {
+    setSelectedProject(project);
+    setIsEditModalOpen(true);
+    setOpenMenuId(null);
+  };
 
   return (
     <div className="flex h-screen bg-transparent">
@@ -85,9 +107,41 @@ export default function ProjectsPage() {
                   <div className="p-4 bg-blue-500/10 rounded-2xl text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300 shadow-inner">
                     <FolderKanban size={28} strokeWidth={2.5} />
                   </div>
-                  <button className="text-muted-contrast hover:text-white p-2">
-                    <MoreVertical size={24} />
-                  </button>
+                  <div className="relative">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuId(openMenuId === (p.id || p._id) ? null : (p.id || p._id));
+                      }}
+                      className="text-muted-contrast hover:text-white p-2 hover:bg-white/5 rounded-lg transition-colors"
+                    >
+                      <MoreVertical size={24} />
+                    </button>
+                    
+                    {openMenuId === (p.id || p._id) && (
+                      <div className="absolute right-0 mt-2 w-48 glass border-white/10 shadow-2xl z-10 py-2 animate-fade overflow-hidden">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(p);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm text-high-contrast hover:bg-white/5 flex items-center gap-3 transition-colors"
+                        >
+                          <Edit size={16} className="text-blue-400" /> Edit Project
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(p.id || p._id);
+                            setOpenMenuId(null);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors"
+                        >
+                          <Trash2 size={16} /> Delete Project
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <h3 className="text-2xl font-bold text-high-contrast mb-3 tracking-tight group-hover:text-blue-400 transition-colors">{p.name}</h3>
                 <p className="text-muted-contrast text-base leading-relaxed line-clamp-2 mb-8 font-medium">
@@ -127,6 +181,13 @@ export default function ProjectsPage() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onProjectCreated={fetchProjects}
+      />
+
+      <EditProjectModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onProjectUpdated={fetchProjects}
+        project={selectedProject}
       />
     </div>
   );
