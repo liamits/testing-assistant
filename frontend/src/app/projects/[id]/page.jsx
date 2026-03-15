@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, Trash2, Edit, BrainCircuit, GripVertical, Download } from "lucide-react";
+import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, Trash2, Edit, BrainCircuit, GripVertical, Download, LogOut } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import api from "../../../lib/api";
 import { toast } from "react-hot-toast";
@@ -9,10 +9,18 @@ import AddTestCaseModal from "../../../components/testcases/AddTestCaseModal";
 import EditTestCaseModal from "../../../components/testcases/EditTestCaseModal";
 import DeleteConfirmationModal from "../../../components/common/DeleteConfirmationModal";
 import { StrictModeDroppable } from "../../../components/common/StrictModeDroppable";
+import AuthGuard from "../../../components/common/AuthGuard";
+import { useAuthStore } from "../../../lib/store";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
+  const logout = useAuthStore((state) => state.logout);
+  
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
   const [project, setProject] = useState(null);
   const [testCases, setTestCases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -248,7 +256,8 @@ export default function ProjectDetailsPage() {
   if (loading) return <div className="p-8 text-high-contrast">Loading...</div>;
 
   return (
-    <div className="p-8 space-y-8 animate-fade">
+    <AuthGuard>
+      <div className="p-8 space-y-8 animate-fade">
       <header className="flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-bold text-high-contrast mb-2">{project?.name}</h1>
@@ -263,6 +272,12 @@ export default function ProjectDetailsPage() {
           </button>
            <button className="btn-secondary flex items-center gap-2">
             <Play size={18} /> Run All Tests
+          </button>
+          <button 
+            onClick={handleLogout}
+            className="px-4 py-2 rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-colors flex items-center gap-2 font-bold uppercase text-sm"
+          >
+            <LogOut size={18} /> Log Out
           </button>
         </div>
       </header>
@@ -402,7 +417,8 @@ export default function ProjectDetailsPage() {
         message={`Are you sure you want to delete "${deleteTarget?.name}"? This action will remove all associated data and cannot be undone.`}
         loading={deleteLoading}
       />
-    </div>
+      </div>
+    </AuthGuard>
   );
 }
 

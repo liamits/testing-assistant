@@ -1,18 +1,23 @@
-"use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { FolderKanban, MoreVertical, Plus, Search, Filter, Trash2, Edit } from "lucide-react";
+import { FolderKanban, MoreVertical, Plus, Search, Filter, Trash2, Edit, LogOut } from "lucide-react";
 import api from "../../lib/api";
 import { toast } from "react-hot-toast";
 import CreateProjectModal from "../../components/projects/CreateProjectModal";
 import EditProjectModal from "../../components/projects/EditProjectModal";
 import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
+import AuthGuard from "../../components/common/AuthGuard";
+import { useAuthStore } from "../../lib/store";
 
 export default function ProjectsPage() {
   const router = useRouter();
+  const logout = useAuthStore((state) => state.logout);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -69,13 +74,14 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-transparent">
+    <AuthGuard>
+      <div className="flex h-screen bg-transparent">
       {/* Sidebar - unified with dashboard theme */}
-      <aside className="w-64 border-r border-white/5 p-6 hidden md:block glass rounded-none">
+      <aside className="w-64 border-r border-white/5 p-6 hidden md:block glass rounded-none flex flex-col">
         <div className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 mb-12 tracking-tight">
           TEST ASSIST
         </div>
-        <nav className="space-y-3">
+        <nav className="space-y-3 flex-1">
           <a href="/dashboard" className="flex items-center gap-3 text-muted-contrast hover:text-white hover:bg-white/5 p-3 rounded-xl transition-all font-medium">
             <FolderKanban size={20} /> Dashboard
           </a>
@@ -83,6 +89,13 @@ export default function ProjectsPage() {
             <FolderKanban size={20} /> Projects
           </a>
         </nav>
+
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 text-red-400 hover:bg-red-400/10 p-3 rounded-xl transition-all font-bold mt-auto w-full text-left"
+        >
+          <LogOut size={20} /> Log Out
+        </button>
       </aside>
 
       <main className="flex-1 overflow-y-auto p-10">
@@ -216,6 +229,7 @@ export default function ProjectsPage() {
         message={`Are you sure you want to delete "${deleteName}"? All associated data will be permanently removed.`}
         loading={deleteLoading}
       />
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

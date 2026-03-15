@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../../../lib/store";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -10,7 +10,26 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
+  const token = useAuthStore((state) => state.token);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
   const router = useRouter();
+
+  useEffect(() => {
+    if (isInitialized && token) {
+      router.replace("/dashboard");
+    }
+  }, [token, isInitialized, router]);
+
+  if (!isInitialized) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#0b0e14]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
