@@ -18,3 +18,5 @@
 [ERROR] Invalid ID format: reorder
 [2026-03-15T13:04:30.675Z] PUT /api/testcases/reorder body: {"orders":[{"id":"69b6a49c477c3d7566576dd0","order":0},{"id":"69b6a7f19967dac83037c174","order":1},{"id":"69b6a49c477c3d7566576dd4","order":2},{"id":"69b6a49c477c3d7566576dd7","order":3}]}
 [ERROR] Invalid ID format: reorder
+[2026-03-15T13:06:03.582Z] PUT /api/testcases/reorder body: {"orders":[{"id":"69b6a7f19967dac83037c174","order":0},{"id":"69b6a49c477c3d7566576dd4","order":1},{"id":"69b6a49c477c3d7566576dd7","order":2},{"id":"69b6a49c477c3d7566576dd0","order":3}]}
+[ERROR] Invalid ID format: reorder

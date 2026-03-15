@@ -15,8 +15,8 @@ router.get("/project/:projectId", getTestCases);
 router.get("/:id", getTestCase);
 router.post("/", upload.single("screenshot"), createTestCase);
 router.post("/bulk", bulkCreateTestCases);
-router.put("/:id", upload.single("screenshot"), updateTestCase);
 router.put("/reorder", reorderTestCases);
+router.put("/:id", upload.single("screenshot"), updateTestCase);
 router.post("/:id/generate-ai", generateAI);
 router.delete("/:id", deleteTestCase);
 

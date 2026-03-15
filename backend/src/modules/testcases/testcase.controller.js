@@ -154,7 +154,12 @@ export const generateAI = async (req, res, next) => {
 export const reorderTestCases = async (req, res, next) => {
   try {
     const { orders } = req.body; // Array of { id, order }
+    console.log("Reorder request received, items count:", orders?.length);
     
+    if (!orders || !Array.isArray(orders)) {
+      return res.status(400).json({ message: "Orders must be an array" });
+    }
+
     const bulkOps = orders.map(({ id, order }) => ({
       updateOne: {
         filter: { _id: id },
@@ -162,7 +167,9 @@ export const reorderTestCases = async (req, res, next) => {
       }
     }));
 
-    await TestCase.bulkWrite(bulkOps);
+    if (bulkOps.length > 0) {
+      await TestCase.bulkWrite(bulkOps);
+    }
     res.json({ message: "Reordered successfully" });
   } catch (err) {
     if (typeof next === "function") next(err);

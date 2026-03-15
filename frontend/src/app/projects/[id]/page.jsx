@@ -1,13 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, Trash2, Edit, BrainCircuit, GripVertical } from "lucide-react";
+import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, Trash2, Edit, BrainCircuit, GripVertical, Download } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import api from "../../../lib/api";
 import { toast } from "react-hot-toast";
 import AddTestCaseModal from "../../../components/testcases/AddTestCaseModal";
 import EditTestCaseModal from "../../../components/testcases/EditTestCaseModal";
 import DeleteConfirmationModal from "../../../components/common/DeleteConfirmationModal";
+import { StrictModeDroppable } from "../../../components/common/StrictModeDroppable";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams();
@@ -109,6 +110,68 @@ export default function ProjectDetailsPage() {
     }
   };
 
+  const handleExportExcel = async () => {
+    const toastId = toast.loading("Đang chuẩn bị file Excel...");
+    try {
+      console.log("Starting Excel export for project:", id);
+      const response = await api.get(`/projects/${id}/export`, {
+        responseType: 'blob',
+      });
+      
+      console.log("Direct response headers:", response.headers);
+      
+      // Extract filename from Content-Disposition header
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = `Testcases_${(project?.name || 'Project')}.xlsx`.replace(/\s+/g, '_');
+      
+      if (contentDisposition) {
+        // Try filename* (UTF-8) first, then standard filename
+        const filenameStarMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/);
+        const filenameMatch = contentDisposition.match(/filename="?([^";]+)"?/);
+        
+        if (filenameStarMatch && filenameStarMatch[1]) {
+          fileName = decodeURIComponent(filenameStarMatch[1]);
+        } else if (filenameMatch && filenameMatch[1]) {
+          fileName = filenameMatch[1];
+        }
+      }
+
+      console.log("Determined fileName:", fileName);
+      console.log("Response data type:", response.data.constructor.name);
+      console.log("Blob size:", response.data.size);
+      
+      // Ensure the blob has the correct Excel MIME type
+      const excelType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      const blob = new Blob([response.data], { type: excelType });
+      
+      console.log("Final Blob type:", blob.type);
+      
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = url;
+      link.setAttribute('download', fileName);
+      link.download = fileName;
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      // Extended cleanup
+      setTimeout(() => {
+        if (link.parentNode) {
+          document.body.removeChild(link);
+        }
+        window.URL.revokeObjectURL(url);
+      }, 2000);
+      
+      toast.success("Đã tải xuống file Excel!", { id: toastId });
+    } catch (err) {
+      console.error("EXCEL EXPORT ERROR:", err);
+      toast.error("Lỗi khi xuất file Excel", { id: toastId });
+    }
+  };
+
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
 
@@ -195,6 +258,9 @@ export default function ProjectDetailsPage() {
            <button onClick={handleDelete} className="px-4 py-2 rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-colors flex items-center gap-2 font-bold uppercase text-sm">
             <Trash2 size={18} /> Delete Project
           </button>
+           <button onClick={handleExportExcel} className="px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center gap-2 font-bold uppercase text-sm shadow-lg shadow-green-500/20">
+            <Download size={18} /> Export Excel
+          </button>
            <button className="btn-secondary flex items-center gap-2">
             <Play size={18} /> Run All Tests
           </button>
@@ -217,20 +283,21 @@ export default function ProjectDetailsPage() {
               </button>
             </div>
             
-            <Droppable droppableId="happy" type="testcase">
+            <StrictModeDroppable droppableId="happy" type="testcase">
               {(provided) => (
                 <div 
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className="space-y-3 min-h-[50px]"
+                  className="space-y-3 min-h-[100px]"
                 >
                   {happyCases.length > 0 ? (
                     happyCases.map((tc, index) => (
                       <Draggable key={tc._id} draggableId={tc._id} index={index}>
-                        {(provided) => (
+                        {(provided, snapshot) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
+                            className={`${snapshot.isDragging ? 'z-50' : ''}`}
                           >
                             <TestCaseCard 
                               testCase={tc} 
@@ -240,6 +307,7 @@ export default function ProjectDetailsPage() {
                               onGenerateAI={handleGenerateAI}
                               onAddStep={() => openModal(tc.category, tc._id)}
                               dragHandleProps={provided.dragHandleProps}
+                              isDragging={snapshot.isDragging}
                             />
                           </div>
                         )}
@@ -251,7 +319,7 @@ export default function ProjectDetailsPage() {
                   {provided.placeholder}
                 </div>
               )}
-            </Droppable>
+            </StrictModeDroppable>
           </section>
 
           {/* Unhappy Cases Section */}
@@ -268,20 +336,21 @@ export default function ProjectDetailsPage() {
               </button>
             </div>
 
-            <Droppable droppableId="unhappy" type="testcase">
+            <StrictModeDroppable droppableId="unhappy" type="testcase">
               {(provided) => (
                 <div 
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className="space-y-3 min-h-[50px]"
+                  className="space-y-3 min-h-[100px]"
                 >
                   {unhappyCases.length > 0 ? (
                     unhappyCases.map((tc, index) => (
                       <Draggable key={tc._id} draggableId={tc._id} index={index}>
-                        {(provided) => (
+                        {(provided, snapshot) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
+                            className={`${snapshot.isDragging ? 'z-50' : ''}`}
                           >
                             <TestCaseCard 
                               testCase={tc} 
@@ -291,6 +360,7 @@ export default function ProjectDetailsPage() {
                               onGenerateAI={handleGenerateAI}
                               onAddStep={() => openModal(tc.category, tc._id)}
                               dragHandleProps={provided.dragHandleProps}
+                              isDragging={snapshot.isDragging}
                             />
                           </div>
                         )}
@@ -302,7 +372,7 @@ export default function ProjectDetailsPage() {
                   {provided.placeholder}
                 </div>
               )}
-            </Droppable>
+            </StrictModeDroppable>
           </section>
         </div>
       </DragDropContext>
@@ -336,12 +406,12 @@ export default function ProjectDetailsPage() {
   );
 }
 
-function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAddStep, dragHandleProps }) {
+function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAddStep, dragHandleProps, isDragging }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const children = allCases.filter(c => c.parentId === testCase._id).sort((a, b) => a.order - b.order);
+  const children = allCases.filter(c => c.parentId === testCase._id).sort((a, b) => (a.order||0) - (b.order||0));
 
   return (
-    <div className="group border border-white/5 bg-white/5 rounded-xl overflow-hidden hover:border-white/10 transition-all">
+    <div className={`group border rounded-xl overflow-hidden transition-all ${isDragging ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/20 scale-[1.02]' : 'border-white/5 bg-white/5 hover:border-white/10'}`}>
       <div 
         className="p-4 flex items-center justify-between cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -397,7 +467,7 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
 
       {isExpanded && (
         <div className="px-4 pb-4 space-y-2 border-t border-white/5 pt-4 bg-black/20 animate-slide-down">
-          <Droppable droppableId={`steps-${testCase._id}`} type="step">
+          <StrictModeDroppable droppableId={`steps-${testCase._id}`} type="step">
             {(provided) => (
               <div 
                 {...provided.droppableProps}
@@ -407,11 +477,11 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
                 {children.length > 0 ? (
                   children.map((child, idx) => (
                     <Draggable key={child._id} draggableId={child._id} index={idx}>
-                      {(provided) => (
+                      {(provided, snapshot) => (
                         <div 
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className="group/step flex gap-3 text-sm p-2 hover:bg-white/5 rounded-lg transition-colors bg-black/10"
+                          className={`group/step flex gap-3 text-sm p-2 rounded-lg transition-colors ${snapshot.isDragging ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-black/10 hover:bg-white/5'}`}
                         >
                           <div {...provided.dragHandleProps} className="text-slate-700 hover:text-slate-500 cursor-grab active:cursor-grabbing">
                             <GripVertical size={14} />
@@ -445,7 +515,7 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
                 {provided.placeholder}
               </div>
             )}
-          </Droppable>
+          </StrictModeDroppable>
 
           <button 
             onClick={(e) => { e.stopPropagation(); onAddStep(); }}
