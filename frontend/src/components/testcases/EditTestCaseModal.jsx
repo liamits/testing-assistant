@@ -39,6 +39,8 @@ export default function EditTestCaseModal({ isOpen, onClose, onTestCaseUpdated, 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Submitting update for test case:", testCase);
+    console.log("ID used:", testCase?._id);
     setLoading(true);
 
     try {
@@ -57,8 +59,10 @@ export default function EditTestCaseModal({ isOpen, onClose, onTestCaseUpdated, 
       onTestCaseUpdated();
       onClose();
     } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Failed to update test case");
+      console.error("Update error:", err);
+      const errorMsg = err.response?.data?.message || "Failed to update test case";
+      const errorDetails = err.response?.status === 404 ? `${errorMsg} (ID: ${testCase?._id})` : errorMsg;
+      toast.error(errorDetails);
     } finally {
       setLoading(false);
     }

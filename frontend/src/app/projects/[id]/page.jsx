@@ -194,6 +194,7 @@ export default function ProjectDetailsPage() {
         testCase={selectedTestCase}
       />
 
+
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}

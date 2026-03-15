@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { TestCase } from "../../models/TestCase.js";
 import { generateTestCases } from "../../services/ai.service.js";
 
@@ -81,18 +82,33 @@ export const bulkCreateTestCases = async (req, res, next) => {
   }
 };
 
+import fs from "fs";
+import path from "path";
+
 export const updateTestCase = async (req, res, next) => {
   try {
-    console.log("Updating test case ID:", req.params.id);
-    console.log("Update body:", req.body);
+    const logData = `[${new Date().toISOString()}] PUT /api/testcases/${req.params.id} body: ${JSON.stringify(req.body)}\n`;
+    fs.appendFileSync(path.resolve("tmp/debug_log.txt"), logData);
+    
     const updateData = { ...req.body };
     if (req.file) {
       updateData.screenshotUrl = `/uploads/testcases/${req.file.filename}`;
     }
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      const msg = `Invalid ID format: ${req.params.id}`;
+      fs.appendFileSync(path.resolve("tmp/debug_log.txt"), `[ERROR] ${msg}\n`);
+      return res.status(400).json({ message: msg });
+    }
+
     const tc = await TestCase.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!tc) return res.status(404).json({ message: "Not found" });
+    if (!tc) {
+      const msg = `Test case not found with ID: ${req.params.id}`;
+      fs.appendFileSync(path.resolve("tmp/debug_log.txt"), `[ERROR] ${msg}\n`);
+      return res.status(404).json({ message: "Not found" });
+    }
     res.json(tc);
   } catch (err) {
+    fs.appendFileSync(path.resolve("tmp/debug_log.txt"), `[EXCEPTION] ${err.message}\n`);
     if (typeof next === "function") next(err);
     else res.status(500).json({ message: err.message });
   }
