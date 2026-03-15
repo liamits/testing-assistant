@@ -83,7 +83,11 @@ export const bulkCreateTestCases = async (req, res, next) => {
 
 export const updateTestCase = async (req, res, next) => {
   try {
-    const tc = await TestCase.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updateData = { ...req.body };
+    if (req.file) {
+      updateData.screenshotUrl = `/uploads/testcases/${req.file.filename}`;
+    }
+    const tc = await TestCase.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!tc) return res.status(404).json({ message: "Not found" });
     res.json(tc);
   } catch (err) {

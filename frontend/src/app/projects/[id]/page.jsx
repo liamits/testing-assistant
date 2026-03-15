@@ -1,10 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, MoreVertical, Trash2 } from "lucide-react";
+import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, MoreVertical, Trash2, Edit } from "lucide-react";
 import api from "../../../lib/api";
 import { toast } from "react-hot-toast";
 import AddTestCaseModal from "../../../components/testcases/AddTestCaseModal";
+import EditTestCaseModal from "../../../components/testcases/EditTestCaseModal";
+import DeleteConfirmationModal from "../../../components/common/DeleteConfirmationModal";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams();
@@ -14,6 +16,11 @@ export default function ProjectDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalCategory, setModalCategory] = useState("happy");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedTestCase, setSelectedTestCase] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null); // { type: 'project' | 'testcase', id: string, name: string }
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -43,18 +50,47 @@ export default function ProjectDetailsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async () => {
-    console.log("handleDelete initiated for project ID:", id);
+  const handleEditTestCase = (tc) => {
+    setSelectedTestCase(tc);
+    setIsEditModalOpen(true);
+  };
+
+  const confirmDeleteProject = () => {
+    setDeleteTarget({ type: 'project', id: id, name: project?.name });
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteTestCase = (tc) => {
+    setDeleteTarget({ type: 'testcase', id: tc._id, name: tc.title });
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
     try {
-      console.log("Calling API to delete project:", id);
-      const res = await api.delete(`/projects/${id}`);
-      console.log("Delete response:", res.data);
-      toast.success("Project deleted");
-      router.push("/projects");
+      if (deleteTarget.type === 'project') {
+        console.log("Deleting project:", deleteTarget.id);
+        await api.delete(`/projects/${deleteTarget.id}`);
+        toast.success("Project deleted");
+        router.push("/projects");
+      } else {
+        console.log("Deleting test case:", deleteTarget.id);
+        await api.delete(`/testcases/${deleteTarget.id}`);
+        toast.success("Test case deleted");
+        fetchData();
+        setIsDeleteModalOpen(false);
+      }
     } catch (err) {
       console.error("Delete error:", err);
-      toast.error("Failed to delete project");
+      toast.error(`Failed to delete ${deleteTarget.type}`);
+    } finally {
+      setDeleteLoading(false);
     }
+  };
+
+  const handleDelete = () => {
+    confirmDeleteProject();
   };
 
   const happyCases = testCases.filter(tc => tc.category === 'happy' && !tc.parentId);
@@ -97,7 +133,13 @@ export default function ProjectDetailsPage() {
           <div className="space-y-3">
             {happyCases.length > 0 ? (
               happyCases.map(tc => (
-                <TestCaseCard key={tc._id} testCase={tc} allCases={testCases} />
+                <TestCaseCard 
+                  key={tc._id} 
+                  testCase={tc} 
+                  allCases={testCases} 
+                  onEdit={handleEditTestCase}
+                  onDelete={confirmDeleteTestCase}
+                />
               ))
             ) : (
               <p className="text-sm text-slate-500 italic">No happy cases yet.</p>
@@ -122,7 +164,13 @@ export default function ProjectDetailsPage() {
           <div className="space-y-3">
             {unhappyCases.length > 0 ? (
               unhappyCases.map(tc => (
-                <TestCaseCard key={tc._id} testCase={tc} allCases={testCases} />
+                <TestCaseCard 
+                  key={tc._id} 
+                  testCase={tc} 
+                  allCases={testCases} 
+                  onEdit={handleEditTestCase}
+                  onDelete={confirmDeleteTestCase}
+                />
               ))
             ) : (
               <p className="text-sm text-slate-500 italic">No unhappy cases yet.</p>
@@ -138,11 +186,27 @@ export default function ProjectDetailsPage() {
         projectId={id}
         category={modalCategory}
       />
+
+      <EditTestCaseModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onTestCaseUpdated={fetchData}
+        testCase={selectedTestCase}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title={`Delete ${deleteTarget?.type === 'project' ? 'Project' : 'Test Case'}`}
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action will remove all associated data and cannot be undone.`}
+        loading={deleteLoading}
+      />
     </div>
   );
 }
 
-function TestCaseCard({ testCase, allCases }) {
+function TestCaseCard({ testCase, allCases, onEdit, onDelete }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const children = allCases.filter(c => c.parentId === testCase._id);
 
@@ -164,6 +228,20 @@ function TestCaseCard({ testCase, allCases }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 mr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEdit(testCase); }}
+              className="p-1.5 hover:bg-white/10 rounded-lg text-blue-400 transition-colors"
+            >
+              <Edit size={16} />
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onDelete(testCase); }}
+              className="p-1.5 hover:bg-red-500/10 rounded-lg text-red-400 transition-colors"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
           {children.length > 0 && (
             <span className="text-[10px] px-2 py-0.5 bg-white/5 rounded-full text-muted-contrast uppercase">
               {children.length} steps
@@ -180,11 +258,25 @@ function TestCaseCard({ testCase, allCases }) {
         <div className="px-4 pb-4 space-y-2 border-t border-white/5 pt-4 bg-black/20 animate-slide-down">
           {children.length > 0 ? (
             children.map((child, idx) => (
-              <div key={child._id} className="flex gap-3 text-sm p-2 hover:bg-white/5 rounded-lg transition-colors">
+              <div key={child._id} className="group/step flex gap-3 text-sm p-2 hover:bg-white/5 rounded-lg transition-colors">
                 <span className="text-slate-500 font-mono w-4">{idx + 1}.</span>
                 <div>
                   <div className="text-high-contrast font-medium">{child.title}</div>
                   <div className="text-muted-contrast text-xs">{child.expectedResult}</div>
+                </div>
+                <div className="ml-auto flex items-center gap-1 opacity-0 group-hover/step:opacity-100 transition-opacity">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onEdit(child); }}
+                    className="p-1 hover:bg-white/10 rounded text-blue-400/70 hover:text-blue-400"
+                  >
+                    <Edit size={12} />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); onDelete(child); }}
+                    className="p-1 hover:bg-red-500/10 rounded text-red-400/70 hover:text-red-400"
+                  >
+                    <Trash2 size={12} />
+                  </button>
                 </div>
               </div>
             ))

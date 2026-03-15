@@ -6,6 +6,7 @@ import api from "../../lib/api";
 import { toast } from "react-hot-toast";
 import CreateProjectModal from "../../components/projects/CreateProjectModal";
 import EditProjectModal from "../../components/projects/EditProjectModal";
+import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -15,6 +16,10 @@ export default function ProjectsPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteName, setDeleteName] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchProjects = async () => {
     try {
@@ -32,17 +37,28 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  const handleDelete = async (id) => {
-    console.log("handleDelete initiated for project ID:", id);
+  const handleDelete = (id, name) => {
+    setDeleteId(id);
+    setDeleteName(name);
+    setIsDeleteModalOpen(true);
+    setOpenMenuId(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    setDeleteLoading(true);
+    console.log("handleConfirmDelete initiated for project ID:", deleteId);
     try {
-      console.log("Calling API to delete project:", id);
-      const res = await api.delete(`/projects/${id}`);
-      console.log("Delete response:", res.data);
+      console.log("Calling API to delete project:", deleteId);
+      await api.delete(`/projects/${deleteId}`);
       toast.success("Project deleted");
+      setIsDeleteModalOpen(false);
       fetchProjects();
     } catch (err) {
       console.error("Delete error:", err);
       toast.error("Failed to delete project");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -135,8 +151,7 @@ export default function ProjectsPage() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(p.id || p._id);
-                            setOpenMenuId(null);
+                            handleDelete(p.id || p._id, p.name);
                           }}
                           className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors"
                         >
@@ -191,6 +206,15 @@ export default function ProjectsPage() {
         onClose={() => setIsEditModalOpen(false)}
         onProjectUpdated={fetchProjects}
         project={selectedProject}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Project"
+        message={`Are you sure you want to delete "${deleteName}"? All associated data will be permanently removed.`}
+        loading={deleteLoading}
       />
     </div>
   );

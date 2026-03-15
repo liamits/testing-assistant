@@ -14,7 +14,7 @@ router.get("/project/:projectId", getTestCases);
 router.get("/:id", getTestCase);
 router.post("/", upload.single("screenshot"), createTestCase);
 router.post("/bulk", bulkCreateTestCases);
-router.put("/:id", updateTestCase);
+router.put("/:id", upload.single("screenshot"), updateTestCase);
 router.delete("/:id", deleteTestCase);
 
 export default router;
