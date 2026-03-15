@@ -45,7 +45,7 @@ export const createTestCase = async (req, res, next) => {
       title,
       description,
       flow,
-      category,
+      category: category || 'HAPPY', // Ensure category is set
       parentId,
       screenshotUrl
     });

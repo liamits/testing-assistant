@@ -14,7 +14,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 export const generateTestCases = async (parent) => {
   const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
-  const prompt = `
+    const prompt = `
     You are a professional QA Engineer. Based on the following business context, generate a list of detailed test cases.
     
     PARENT CONTEXT:
@@ -23,11 +23,21 @@ export const generateTestCases = async (parent) => {
     - Business Flow: ${parent.flow}
     - Category: ${parent.category.toUpperCase()}
 
-    REQUIREMENTS:
+    CRITICAL REQUIREMENTS BY CATEGORY:
+    ${parent.category.toUpperCase() === 'HAPPY' ? `
+    - THIS IS A HAPPY CASE GENERATION.
+    - Generate ONLY happy path scenarios (successful outcomes).
+    - child test titles MUST end with "successful". Example: "Login successful".
+    - Do NOT include any error cases, invalid inputs, edge cases, or negative scenarios.
+    ` : `
+    - THIS IS AN UNHAPPY CASE GENERATION.
+    - Generate ONLY unhappy path scenarios (failures, error states, invalid inputs, edge cases).
+    - Do NOT include any successful or happy path scenarios.
+    `}
+
+    GENERAL REQUIREMENTS:
     - Return a JSON array of objects.
     - Each object must have: "title", "description", "steps" (array of {stepNumber, action, expectedResult}), "expectedResult".
-    - If category is HAPPY, child test titles MUST end with "successful". Example: "Login successful".
-    - Focus on ${parent.category} scenarios.
     
     Output ONLY valid JSON.
   `;
@@ -68,12 +78,23 @@ export const generateTestCasesFromImage = async (imagePath, category) => {
       You are an expert QA Engineer. Analyze the provided screenshot of a web application.
       Based ONLY on what you see in the image, generate a list of detailed test cases for this specific screen.
       
-      REQUIREMENTS:
+      CATEGORY: ${category.toUpperCase()}
+
+      CRITICAL REQUIREMENTS BY CATEGORY:
+      ${category.toUpperCase() === 'HAPPY' ? `
+      - THIS IS A HAPPY CASE GENERATION.
+      - Generate ONLY happy path scenarios (successful outcomes).
+      - child test titles MUST end with "successful".
+      - Do NOT include any error cases, invalid inputs, edge cases, or negative scenarios.
+      ` : `
+      - THIS IS AN UNHAPPY CASE GENERATION.
+      - Generate ONLY unhappy path scenarios (failures, error states, invalid inputs, edge cases).
+      - Do NOT include any successful or happy path scenarios.
+      `}
+
+      GENERAL REQUIREMENTS:
       - Return a JSON array of objects.
       - Each object must have: "title", "description", "steps" (array of {stepNumber, action, expectedResult}), "expectedResult".
-      - Focus on ${category.toUpperCase()} scenarios.
-      - If category is HAPPY, child test titles MUST end with "successful".
-      - If category is UNHAPPY, focus on error states, invalid inputs, or edge cases visible.
       - Identify buttons, inputs, links, and text elements to derive meaningful actions.
       
       Output ONLY valid JSON.
