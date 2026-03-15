@@ -32,6 +32,7 @@ export const generateTestCases = async (parent) => {
     ` : `
     - THIS IS AN UNHAPPY CASE GENERATION.
     - Generate ONLY unhappy path scenarios (failures, error states, invalid inputs, edge cases).
+    - child test titles MUST end with "failed". Example: "Login failed - wrong password".
     - Do NOT include any successful or happy path scenarios.
     `}
 
@@ -89,6 +90,7 @@ export const generateTestCasesFromImage = async (imagePath, category) => {
       ` : `
       - THIS IS AN UNHAPPY CASE GENERATION.
       - Generate ONLY unhappy path scenarios (failures, error states, invalid inputs, edge cases).
+      - child test titles MUST end with "failed".
       - Do NOT include any successful or happy path scenarios.
       `}
 
