@@ -4,7 +4,7 @@ import {
   getTestCases, getTestCase,
   createTestCase, updateTestCase,
   deleteTestCase, bulkCreateTestCases,
-  generateAI
+  generateAI, reorderTestCases
 } from "./testcase.controller.js";
 import { upload } from "../../middleware/upload.middleware.js";
 
