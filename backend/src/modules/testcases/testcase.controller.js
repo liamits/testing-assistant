@@ -13,7 +13,7 @@ export const getTestCases = async (req, res, next) => {
     if (category) query.category = category;
     if (search) query.title = { $regex: search, $options: "i" };
 
-    const testCases = await TestCase.find(query).sort({ createdAt: -1 });
+    const testCases = await TestCase.find(query).sort({ order: 1, createdAt: -1 });
     res.json(testCases);
   } catch (err) {
     if (typeof next === "function") next(err);
@@ -146,6 +146,25 @@ export const generateAI = async (req, res, next) => {
     });
   } catch (err) {
     console.error("Manual AI Generation Error:", err);
+    if (typeof next === "function") next(err);
+    else res.status(500).json({ message: err.message });
+  }
+};
+
+export const reorderTestCases = async (req, res, next) => {
+  try {
+    const { orders } = req.body; // Array of { id, order }
+    
+    const bulkOps = orders.map(({ id, order }) => ({
+      updateOne: {
+        filter: { _id: id },
+        update: { order }
+      }
+    }));
+
+    await TestCase.bulkWrite(bulkOps);
+    res.json({ message: "Reordered successfully" });
+  } catch (err) {
     if (typeof next === "function") next(err);
     else res.status(500).json({ message: err.message });
   }

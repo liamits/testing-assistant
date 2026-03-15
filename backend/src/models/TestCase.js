@@ -17,6 +17,7 @@ const testCaseSchema = new mongoose.Schema({
   automationCode: { type: String },
   priority: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'], default: 'MEDIUM' },
   status: { type: String, enum: ['DRAFT', 'ACTIVE', 'ARCHIVED'], default: 'DRAFT' },
+  order: { type: Number, default: 0 },
   tags: [String],
 }, { timestamps: true });
 

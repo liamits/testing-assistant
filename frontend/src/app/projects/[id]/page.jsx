@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, MoreVertical, Trash2, Edit, BrainCircuit } from "lucide-react";
+import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, Trash2, Edit, BrainCircuit, GripVertical } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import api from "../../../lib/api";
 import { toast } from "react-hot-toast";
 import AddTestCaseModal from "../../../components/testcases/AddTestCaseModal";
@@ -108,6 +109,72 @@ export default function ProjectDetailsPage() {
     }
   };
 
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    const { source, destination, type } = result;
+    
+    if (type === "testcase") {
+      const allItems = Array.from(testCases);
+      const happy = allItems.filter(tc => !tc.parentId && tc.category === 'happy').sort((a,b) => (a.order||0) - (b.order||0));
+      const unhappy = allItems.filter(tc => !tc.parentId && tc.category === 'unhappy').sort((a,b) => (a.order||0) - (b.order||0));
+      
+      const sourceList = source.droppableId === 'happy' ? happy : unhappy;
+      const destList = destination.droppableId === 'happy' ? happy : unhappy;
+      
+      const [reorderedItem] = sourceList.splice(source.index, 1);
+      
+      if (source.droppableId !== destination.droppableId) {
+        reorderedItem.category = destination.droppableId;
+      }
+      
+      destList.splice(destination.index, 0, reorderedItem);
+
+      // Re-calculate orders for affected lists
+      const updatedOrders = [];
+      happy.forEach((item, idx) => {
+        item.order = idx;
+        updatedOrders.push({ id: item._id, order: idx });
+      });
+      unhappy.forEach((item, idx) => {
+        item.order = idx;
+        updatedOrders.push({ id: item._id, order: idx });
+      });
+
+      setTestCases([...allItems]);
+
+      try {
+        await api.put("/testcases/reorder", { orders: updatedOrders });
+        toast.success("Order updated");
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to save order");
+        fetchData();
+      }
+    } else if (type === "step") {
+      const parentId = source.droppableId.replace("steps-", "");
+      const allItems = Array.from(testCases);
+      const children = allItems.filter(tc => tc.parentId === parentId).sort((a,b) => (a.order||0) - (b.order||0));
+      
+      const [reorderedStep] = children.splice(source.index, 1);
+      children.splice(destination.index, 0, reorderedStep);
+
+      const orders = children.map((item, index) => {
+        item.order = index;
+        return { id: item._id, order: index };
+      });
+      
+      setTestCases([...allItems]);
+
+      try {
+        await api.put("/testcases/reorder", { orders });
+      } catch (err) {
+        console.error(err);
+        fetchData();
+      }
+    }
+  };
+
   const handleDelete = () => {
     confirmDeleteProject();
   };
@@ -134,73 +201,111 @@ export default function ProjectDetailsPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Happy Cases Section */}
-        <section className="glass p-6 space-y-4">
-          <div className="flex justify-between items-center border-b border-white/5 pb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2 text-green-400">
-              <CheckCircle size={20} /> Happy Cases
-            </h2>
-            <button 
-              onClick={() => openModal("happy")}
-              className="p-2 hover:bg-white/5 rounded-lg text-muted-contrast transition-colors"
-            >
-              <Plus size={20} />
-            </button>
-          </div>
-          
-          <div className="space-y-3">
-            {happyCases.length > 0 ? (
-              happyCases.map(tc => (
-                <TestCaseCard 
-                  key={tc._id} 
-                  testCase={tc} 
-                  allCases={testCases} 
-                  onEdit={handleEditTestCase}
-                  onDelete={confirmDeleteTestCase}
-                  onGenerateAI={handleGenerateAI}
-                  onAddStep={() => openModal(tc.category, tc._id)}
-                />
-              ))
-            ) : (
-              <p className="text-sm text-slate-500 italic">No happy cases yet.</p>
-            )}
-          </div>
-        </section>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Happy Cases Section */}
+          <section className="glass p-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <h2 className="text-xl font-bold flex items-center gap-2 text-green-400">
+                <CheckCircle size={20} /> Happy Cases
+              </h2>
+              <button 
+                onClick={() => openModal("happy")}
+                className="p-2 hover:bg-white/5 rounded-lg text-muted-contrast transition-colors"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+            
+            <Droppable droppableId="happy" type="testcase">
+              {(provided) => (
+                <div 
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="space-y-3 min-h-[50px]"
+                >
+                  {happyCases.length > 0 ? (
+                    happyCases.map((tc, index) => (
+                      <Draggable key={tc._id} draggableId={tc._id} index={index}>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                          >
+                            <TestCaseCard 
+                              testCase={tc} 
+                              allCases={testCases} 
+                              onEdit={handleEditTestCase}
+                              onDelete={confirmDeleteTestCase}
+                              onGenerateAI={handleGenerateAI}
+                              onAddStep={() => openModal(tc.category, tc._id)}
+                              dragHandleProps={provided.dragHandleProps}
+                            />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500 italic">No happy cases yet.</p>
+                  )}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </section>
 
-        {/* Unhappy Cases Section */}
-        <section className="glass p-6 space-y-4">
-          <div className="flex justify-between items-center border-b border-white/5 pb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2 text-red-400">
-              <AlertCircle size={20} /> Unhappy Cases
-            </h2>
-            <button 
-              onClick={() => openModal("unhappy")}
-              className="p-2 hover:bg-white/5 rounded-lg text-muted-contrast transition-colors"
-            >
-              <Plus size={20} />
-            </button>
-          </div>
+          {/* Unhappy Cases Section */}
+          <section className="glass p-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <h2 className="text-xl font-bold flex items-center gap-2 text-red-400">
+                <AlertCircle size={20} /> Unhappy Cases
+              </h2>
+              <button 
+                onClick={() => openModal("unhappy")}
+                className="p-2 hover:bg-white/5 rounded-lg text-muted-contrast transition-colors"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
 
-          <div className="space-y-3">
-            {unhappyCases.length > 0 ? (
-              unhappyCases.map(tc => (
-                <TestCaseCard 
-                  key={tc._id} 
-                  testCase={tc} 
-                  allCases={testCases} 
-                  onEdit={handleEditTestCase}
-                  onDelete={confirmDeleteTestCase}
-                  onGenerateAI={handleGenerateAI}
-                  onAddStep={() => openModal(tc.category, tc._id)}
-                />
-              ))
-            ) : (
-              <p className="text-sm text-slate-500 italic">No unhappy cases yet.</p>
-            )}
-          </div>
-        </section>
-      </div>
+            <Droppable droppableId="unhappy" type="testcase">
+              {(provided) => (
+                <div 
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="space-y-3 min-h-[50px]"
+                >
+                  {unhappyCases.length > 0 ? (
+                    unhappyCases.map((tc, index) => (
+                      <Draggable key={tc._id} draggableId={tc._id} index={index}>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                          >
+                            <TestCaseCard 
+                              testCase={tc} 
+                              allCases={testCases} 
+                              onEdit={handleEditTestCase}
+                              onDelete={confirmDeleteTestCase}
+                              onGenerateAI={handleGenerateAI}
+                              onAddStep={() => openModal(tc.category, tc._id)}
+                              dragHandleProps={provided.dragHandleProps}
+                            />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500 italic">No unhappy cases yet.</p>
+                  )}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </section>
+        </div>
+      </DragDropContext>
 
       <AddTestCaseModal 
         isOpen={isModalOpen}
@@ -231,9 +336,9 @@ export default function ProjectDetailsPage() {
   );
 }
 
-function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAddStep }) {
+function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAddStep, dragHandleProps }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const children = allCases.filter(c => c.parentId === testCase._id);
+  const children = allCases.filter(c => c.parentId === testCase._id).sort((a, b) => a.order - b.order);
 
   return (
     <div className="group border border-white/5 bg-white/5 rounded-xl overflow-hidden hover:border-white/10 transition-all">
@@ -242,6 +347,9 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-4">
+          <div {...dragHandleProps} className="text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing">
+            <GripVertical size={16} />
+          </div>
           <div className={`p-2 rounded-lg ${testCase.category === 'happy' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
             <FileText size={18} />
           </div>
@@ -289,33 +397,55 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
 
       {isExpanded && (
         <div className="px-4 pb-4 space-y-2 border-t border-white/5 pt-4 bg-black/20 animate-slide-down">
-          {children.length > 0 ? (
-            children.map((child, idx) => (
-              <div key={child._id} className="group/step flex gap-3 text-sm p-2 hover:bg-white/5 rounded-lg transition-colors">
-                <span className="text-slate-500 font-mono w-4">{idx + 1}.</span>
-                <div>
-                  <div className="text-high-contrast font-medium">{child.title}</div>
-                  <div className="text-muted-contrast text-xs">{child.expectedResult}</div>
-                </div>
-                <div className="ml-auto flex items-center gap-1 opacity-0 group-hover/step:opacity-100 transition-opacity">
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); onEdit(child); }}
-                    className="p-1 hover:bg-white/10 rounded text-blue-400/70 hover:text-blue-400"
-                  >
-                    <Edit size={12} />
-                  </button>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); onDelete(child); }}
-                    className="p-1 hover:bg-red-500/10 rounded text-red-400/70 hover:text-red-400"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
+          <Droppable droppableId={`steps-${testCase._id}`} type="step">
+            {(provided) => (
+              <div 
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="space-y-2"
+              >
+                {children.length > 0 ? (
+                  children.map((child, idx) => (
+                    <Draggable key={child._id} draggableId={child._id} index={idx}>
+                      {(provided) => (
+                        <div 
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className="group/step flex gap-3 text-sm p-2 hover:bg-white/5 rounded-lg transition-colors bg-black/10"
+                        >
+                          <div {...provided.dragHandleProps} className="text-slate-700 hover:text-slate-500 cursor-grab active:cursor-grabbing">
+                            <GripVertical size={14} />
+                          </div>
+                          <span className="text-slate-500 font-mono w-4">{idx + 1}.</span>
+                          <div>
+                            <div className="text-high-contrast font-medium">{child.title}</div>
+                            <div className="text-muted-contrast text-xs">{child.expectedResult}</div>
+                          </div>
+                          <div className="ml-auto flex items-center gap-1 opacity-0 group-hover/step:opacity-100 transition-opacity">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); onEdit(child); }}
+                              className="p-1 hover:bg-white/10 rounded text-blue-400/70 hover:text-blue-400"
+                            >
+                              <Edit size={12} />
+                            </button>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); onDelete(child); }}
+                              className="p-1 hover:bg-red-500/10 rounded text-red-400/70 hover:text-red-400"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))
+                ) : (
+                  <div className="text-xs text-slate-500 italic p-2">No steps yet. Use AI or add manually.</div>
+                )}
+                {provided.placeholder}
               </div>
-            ))
-          ) : (
-            <div className="text-xs text-slate-500 italic p-2">No steps yet. Use AI or add manually.</div>
-          )}
+            )}
+          </Droppable>
 
           <button 
             onClick={(e) => { e.stopPropagation(); onAddStep(); }}
