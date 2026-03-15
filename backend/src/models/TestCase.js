@@ -10,18 +10,14 @@ const testCaseSchema = new mongoose.Schema({
     expectedResult: { type: String },
   }],
   expectedResult: { type: String },
+  screenshotUrl: { type: String },
+  flow: { type: String },
+  category: { type: String, enum: ['happy', 'unhappy'], required: true },
+  parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestCase' }, // For hierarchy
   automationCode: { type: String },
   priority: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'], default: 'MEDIUM' },
-  type: { type: String, enum: ['POSITIVE', 'NEGATIVE', 'EDGE'], default: 'POSITIVE' },
   status: { type: String, enum: ['DRAFT', 'ACTIVE', 'ARCHIVED'], default: 'DRAFT' },
   tags: [String],
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
-
-testCaseSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+}, { timestamps: true });
 
 export const TestCase = mongoose.model('TestCase', testCaseSchema);

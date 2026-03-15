@@ -5,14 +5,15 @@ import {
   createTestCase, updateTestCase,
   deleteTestCase, bulkCreateTestCases
 } from "./testcase.controller.js";
+import { upload } from "../../middleware/upload.middleware.js";
 
 const router = Router();
 router.use(authMiddleware);
 
 router.get("/project/:projectId", getTestCases);
 router.get("/:id", getTestCase);
-router.post("/", createTestCase);
-router.post("/bulk", bulkCreateTestCases);   // dùng khi AI generate nhiều case
+router.post("/", upload.single("screenshot"), createTestCase);
+router.post("/bulk", bulkCreateTestCases);
 router.put("/:id", updateTestCase);
 router.delete("/:id", deleteTestCase);
 

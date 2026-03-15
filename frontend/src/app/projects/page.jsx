@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FolderKanban, MoreVertical, Plus, Search, Filter } from "lucide-react";
 import api from "../../lib/api";
 import CreateProjectModal from "../../components/projects/CreateProjectModal";
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -74,7 +76,11 @@ export default function ProjectsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.length > 0 ? projects.map((p) => (
-              <div key={p.id} className="glass p-8 hover:transform hover:-translate-y-1 transition-all duration-300 border-white/5 group hover:border-blue-500/30">
+              <div 
+                key={p.id || p._id} 
+                onClick={() => router.push(`/projects/${p.id || p._id}`)}
+                className="glass p-8 hover:transform hover:-translate-y-1 transition-all duration-300 border-white/5 group hover:border-blue-500/30 cursor-pointer"
+              >
                 <div className="flex justify-between items-start mb-6">
                   <div className="p-4 bg-blue-500/10 rounded-2xl text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300 shadow-inner">
                     <FolderKanban size={28} strokeWidth={2.5} />
