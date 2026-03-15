@@ -16,6 +16,7 @@ export default function ProjectDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalCategory, setModalCategory] = useState("happy");
+  const [selectedParentId, setSelectedParentId] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTestCase, setSelectedTestCase] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -45,8 +46,9 @@ export default function ProjectDetailsPage() {
     }
   };
 
-  const openModal = (category) => {
+  const openModal = (category, parentId = null) => {
     setModalCategory(category);
+    setSelectedParentId(parentId);
     setIsModalOpen(true);
   };
 
@@ -157,6 +159,7 @@ export default function ProjectDetailsPage() {
                   onEdit={handleEditTestCase}
                   onDelete={confirmDeleteTestCase}
                   onGenerateAI={handleGenerateAI}
+                  onAddStep={() => openModal(tc.category, tc._id)}
                 />
               ))
             ) : (
@@ -189,6 +192,7 @@ export default function ProjectDetailsPage() {
                   onEdit={handleEditTestCase}
                   onDelete={confirmDeleteTestCase}
                   onGenerateAI={handleGenerateAI}
+                  onAddStep={() => openModal(tc.category, tc._id)}
                 />
               ))
             ) : (
@@ -204,6 +208,7 @@ export default function ProjectDetailsPage() {
         onTestCaseCreated={fetchData}
         projectId={id}
         category={modalCategory}
+        parentId={selectedParentId}
       />
 
       <EditTestCaseModal
@@ -226,7 +231,7 @@ export default function ProjectDetailsPage() {
   );
 }
 
-function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI }) {
+function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAddStep }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const children = allCases.filter(c => c.parentId === testCase._id);
 
@@ -309,8 +314,15 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI }) {
               </div>
             ))
           ) : (
-            <div className="text-xs text-slate-500 italic p-2">Generating children test cases...</div>
+            <div className="text-xs text-slate-500 italic p-2">No steps yet. Use AI or add manually.</div>
           )}
+
+          <button 
+            onClick={(e) => { e.stopPropagation(); onAddStep(); }}
+            className="w-full mt-2 p-2 border border-dashed border-white/10 rounded-lg text-xs text-muted-contrast hover:text-white hover:border-white/20 transition-all flex items-center justify-center gap-2"
+          >
+            <Plus size={14} /> Add Manual Step
+          </button>
         </div>
       )}
     </div>
