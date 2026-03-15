@@ -14,6 +14,7 @@ const app = express();
 
 app.use(cors({ origin: process.env.CLIENT_URL }));
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api/auth", authRouter);

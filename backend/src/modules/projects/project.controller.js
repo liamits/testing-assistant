@@ -14,7 +14,10 @@ export const getProjects = async (req, res, next) => {
     }));
 
     res.json(projectsWithCount);
-  } catch (err) { next(err); }
+  } catch (err) {
+    if (typeof next === "function") next(err);
+    else res.status(500).json({ message: err.message });
+  }
 };
 
 export const getProject = async (req, res, next) => {
@@ -26,28 +29,52 @@ export const getProject = async (req, res, next) => {
     const testRuns = await TestRun.find({ projectId: project._id }).sort({ createdAt: -1 }).limit(10);
 
     res.json({ ...project, id: project._id, testCases, testRuns });
-  } catch (err) { next(err); }
+  } catch (err) {
+    if (typeof next === "function") next(err);
+    else res.status(500).json({ message: err.message });
+  }
 };
 
 export const createProject = async (req, res, next) => {
   try {
-    const { name, description } = req.body;
-    const project = await Project.create({ name, description, userId: req.user.id });
+    const { name, description, baseUrl } = req.body;
+    if (!name || !baseUrl) {
+      return res.status(400).json({ message: "Project Name and Base URL are required" });
+    }
+
+    const project = new Project({ 
+      name, 
+      description, 
+      baseUrl,
+      userId: req.user.id 
+    });
+    
+    await project.save();
     res.status(201).json({ ...project.toObject(), id: project._id });
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.error("Error in createProject:", err);
+    if (typeof next === "function") {
+      next(err);
+    } else {
+      res.status(500).json({ message: err.message || "Internal server error" });
+    }
+  }
 };
 
 export const updateProject = async (req, res, next) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, baseUrl } = req.body;
     const project = await Project.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
-      { name, description },
+      { name, description, baseUrl },
       { new: true }
     );
     if (!project) return res.status(404).json({ message: "Project not found" });
     res.json({ ...project.toObject(), id: project._id });
-  } catch (err) { next(err); }
+  } catch (err) {
+    if (typeof next === "function") next(err);
+    else res.status(500).json({ message: err.message });
+  }
 };
 
 export const deleteProject = async (req, res, next) => {
@@ -60,5 +87,8 @@ export const deleteProject = async (req, res, next) => {
     await TestRun.deleteMany({ projectId: req.params.id });
 
     res.json({ message: "Deleted" });
-  } catch (err) { next(err); }
+  } catch (err) {
+    if (typeof next === "function") next(err);
+    else res.status(500).json({ message: err.message });
+  }
 };

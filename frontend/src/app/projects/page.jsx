@@ -2,22 +2,26 @@
 import { useEffect, useState } from "react";
 import { FolderKanban, MoreVertical, Plus, Search, Filter } from "lucide-react";
 import api from "../../lib/api";
+import CreateProjectModal from "../../components/projects/CreateProjectModal";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get("/projects");
+      setProjects(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const { data } = await api.get("/projects");
-        setProjects(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProjects();
   }, []);
 
@@ -41,7 +45,7 @@ export default function ProjectsPage() {
       <main className="flex-1 overflow-y-auto p-10">
         <header className="flex justify-between items-center mb-12">
           <h1 className="text-4xl font-black text-high-contrast tracking-tight">Projects</h1>
-          <button className="btn-primary flex items-center gap-2 px-6">
+          <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 px-6">
             <Plus size={20} strokeWidth={3} /> Create Project
           </button>
         </header>
@@ -104,7 +108,7 @@ export default function ProjectsPage() {
                 <p className="text-muted-contrast text-lg mb-10 max-w-md mx-auto">
                   Your project landscape is empty. Let's seed your first testing environment.
                 </p>
-                <button className="btn-primary flex items-center gap-2 px-8 py-4 text-xl">
+                <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 px-8 py-4 text-xl">
                   <Plus size={24} strokeWidth={3} /> Initialize Project
                 </button>
               </div>
@@ -112,6 +116,12 @@ export default function ProjectsPage() {
           </div>
         )}
       </main>
+
+      <CreateProjectModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onProjectCreated={fetchProjects}
+      />
     </div>
   );
 }

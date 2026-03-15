@@ -5,6 +5,7 @@ import {
   createProject, updateProject, deleteProject
 } from "./project.controller.js";
 
+
 const router = Router();
 router.use(authMiddleware);
 

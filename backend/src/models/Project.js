@@ -3,15 +3,13 @@ import mongoose from 'mongoose';
 const projectSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String },
+  baseUrl: { type: String, required: true },
+  screenshotUrl: { type: String },
+  businessFlow: { type: String },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-});
-
-projectSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+}, { timestamps: true });
 
 export const Project = mongoose.model('Project', projectSchema);
