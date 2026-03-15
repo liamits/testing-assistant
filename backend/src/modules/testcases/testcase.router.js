@@ -3,7 +3,8 @@ import { authMiddleware } from "../../middleware/auth.middleware.js";
 import {
   getTestCases, getTestCase,
   createTestCase, updateTestCase,
-  deleteTestCase, bulkCreateTestCases
+  deleteTestCase, bulkCreateTestCases,
+  generateAI
 } from "./testcase.controller.js";
 import { upload } from "../../middleware/upload.middleware.js";
 
@@ -15,6 +16,7 @@ router.get("/:id", getTestCase);
 router.post("/", upload.single("screenshot"), createTestCase);
 router.post("/bulk", bulkCreateTestCases);
 router.put("/:id", upload.single("screenshot"), updateTestCase);
+router.post("/:id/generate-ai", generateAI);
 router.delete("/:id", deleteTestCase);
 
 export default router;

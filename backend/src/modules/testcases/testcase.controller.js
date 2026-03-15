@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
+import fs from "fs";
+import path from "path";
 import { TestCase } from "../../models/TestCase.js";
-import { generateTestCases } from "../../services/ai.service.js";
+import { generateTestCases, generateTestCasesFromImage } from "../../services/ai.service.js";
 
 export const getTestCases = async (req, res, next) => {
   try {
@@ -48,21 +50,6 @@ export const createTestCase = async (req, res, next) => {
       screenshotUrl
     });
 
-    if (!parentId) {
-      try {
-        const childrenData = await generateTestCases({ title, description, flow, category });
-        const children = childrenData.map(child => ({
-          ...child,
-          projectId,
-          parentId: tc._id,
-          category
-        }));
-        await TestCase.insertMany(children);
-      } catch (aiErr) {
-        console.error("AI Generation failed:", aiErr);
-      }
-    }
-
     res.status(201).json(tc);
   } catch (err) {
     if (typeof next === "function") next(err);
@@ -82,8 +69,6 @@ export const bulkCreateTestCases = async (req, res, next) => {
   }
 };
 
-import fs from "fs";
-import path from "path";
 
 export const updateTestCase = async (req, res, next) => {
   try {
@@ -120,6 +105,47 @@ export const deleteTestCase = async (req, res, next) => {
     if (!result) return res.status(404).json({ message: "Not found" });
     res.json({ message: "Deleted" });
   } catch (err) {
+    if (typeof next === "function") next(err);
+    else res.status(500).json({ message: err.message });
+  }
+};
+
+export const generateAI = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    fs.appendFileSync(path.resolve("tmp/debug_log.txt"), `[${new Date().toISOString()}] POST /api/testcases/${id}/generate-ai\n`);
+    const tc = await TestCase.findById(id);
+    if (!tc) return res.status(404).json({ message: "Test case not found" });
+
+    if (!tc.screenshotUrl) {
+      return res.status(400).json({ message: "No screenshot found for this test case. Please upload one first." });
+    }
+
+    const imagePath = path.resolve(tc.screenshotUrl.startsWith("/") ? tc.screenshotUrl.slice(1) : tc.screenshotUrl);
+    
+    if (!fs.existsSync(imagePath)) {
+      return res.status(404).json({ message: "Screenshot file not found on server" });
+    }
+
+    // Generate test cases from image
+    const childrenData = await generateTestCasesFromImage(imagePath, tc.category);
+    
+    // Save as children
+    const children = childrenData.map(child => ({
+      ...child,
+      projectId: tc.projectId,
+      parentId: tc._id,
+      category: tc.category
+    }));
+
+    const created = await TestCase.insertMany(children);
+    
+    res.json({ 
+      message: `Successfully generated ${created.length} test cases from image.`,
+      children: created 
+    });
+  } catch (err) {
+    console.error("Manual AI Generation Error:", err);
     if (typeof next === "function") next(err);
     else res.status(500).json({ message: err.message });
   }

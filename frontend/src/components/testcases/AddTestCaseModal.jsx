@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 
 export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, projectId, category }) {
   const [loading, setLoading] = useState(false);
+  const [genLoading, setGenLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -41,7 +42,7 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      toast.success("Test case created and AI generation triggered!");
+      toast.success("Test case created! You can now generate steps from the screenshot in the edit modal.");
       onTestCaseCreated();
       onClose();
     } catch (err) {
@@ -49,6 +50,50 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
       toast.error(err.response?.data?.message || "Failed to create test case");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateAndGenerate = async () => {
+    if (!formData.title) {
+      toast.error("Vui lòng nhập tiêu đề!");
+      return;
+    }
+    setLoading(true);
+    setGenLoading(true);
+
+    try {
+      // 1. Create the test case first
+      const data = new FormData();
+      data.append("projectId", projectId);
+      data.append("category", category);
+      data.append("title", formData.title);
+      data.append("description", formData.description);
+      data.append("flow", formData.flow);
+      if (file) data.append("screenshot", file);
+
+      const res = await api.post("/testcases", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const newTestCase = res.data;
+
+      // 2. Trigger AI generation
+      if (file) {
+        toast.loading("Đang tạo test case con bằng AI...", { id: "ai-gen" });
+        await api.post(`/testcases/${newTestCase._id}/generate-ai`);
+        toast.success("Đã tạo test case cha và con thành công!", { id: "ai-gen" });
+      } else {
+        toast.success("Đã tạo test case cha! (Không có ảnh để quét AI)");
+      }
+
+      onTestCaseCreated();
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Lỗi khi tạo và quét AI", { id: "ai-gen" });
+    } finally {
+      setLoading(false);
+      setGenLoading(false);
     }
   };
 
@@ -123,8 +168,7 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
               <FileText size={14} /> Detailed Workflow
             </label>
             <textarea
-              required
-              placeholder="Step by step flow for AI to expand..."
+              placeholder="Step by step flow for AI to expand (Optional)..."
               value={formData.flow}
               onChange={(e) => setFormData({ ...formData, flow: e.target.value })}
               className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast h-32 resize-none focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-600"
@@ -136,16 +180,30 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
               Cancel
             </button>
             <button
-              disabled={loading}
+              disabled={loading || genLoading}
               type="submit"
-              className="btn-primary flex items-center gap-2 uppercase text-sm font-bold"
+              className="px-6 py-2 rounded-xl text-muted-contrast hover:text-white transition-colors uppercase text-sm font-bold"
             >
-              {loading ? (
+              {loading && !genLoading ? (
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
               ) : (
-                <Plus size={18} />
+                <Plus size={18} className="inline mr-2" />
               )}
-              Create & Generate
+              Chỉ tạo cha
+            </button>
+
+            <button
+              type="button"
+              disabled={loading || genLoading}
+              onClick={handleCreateAndGenerate}
+              className="px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white transition-all flex items-center gap-2 uppercase text-sm font-bold shadow-lg shadow-purple-500/20"
+            >
+              {genLoading ? (
+                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              ) : (
+                <BrainCircuit size={18} />
+              )}
+              Tạo & Quét AI
             </button>
           </div>
         </form>

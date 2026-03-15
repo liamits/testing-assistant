@@ -68,6 +68,7 @@ export default function EditTestCaseModal({ isOpen, onClose, onTestCaseUpdated, 
     }
   };
 
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade">
       <div className="glass w-full max-w-2xl overflow-hidden shadow-2xl border-white/10 animate-slide">
@@ -131,6 +132,11 @@ export default function EditTestCaseModal({ isOpen, onClose, onTestCaseUpdated, 
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
               </div>
+              {file && (
+                <p className="text-[10px] text-blue-400 font-medium italic mt-1 animate-pulse">
+                   💡 Vui lòng ấn 'Update' trước khi tạo test case tự động để lưu ảnh mới.
+                </p>
+              )}
             </div>
           </div>
 

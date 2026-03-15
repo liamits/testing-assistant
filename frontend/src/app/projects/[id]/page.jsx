@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, MoreVertical, Trash2, Edit } from "lucide-react";
+import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, MoreVertical, Trash2, Edit, BrainCircuit } from "lucide-react";
 import api from "../../../lib/api";
 import { toast } from "react-hot-toast";
 import AddTestCaseModal from "../../../components/testcases/AddTestCaseModal";
@@ -53,6 +53,23 @@ export default function ProjectDetailsPage() {
   const handleEditTestCase = (tc) => {
     setSelectedTestCase(tc);
     setIsEditModalOpen(true);
+  };
+
+  const handleGenerateAI = async (tc) => {
+    if (!tc.screenshotUrl) {
+      toast.error("Vui lòng tải ảnh lên trước khi tạo test case tự động!");
+      return;
+    }
+
+    const toastId = toast.loading("AI đang quét ảnh...");
+    try {
+      const res = await api.post(`/testcases/${tc._id}/generate-ai`);
+      toast.success(res.data.message || "Đã tạo test case thành công!", { id: toastId });
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Lỗi khi quét AI", { id: toastId });
+    }
   };
 
   const confirmDeleteProject = () => {
@@ -139,6 +156,7 @@ export default function ProjectDetailsPage() {
                   allCases={testCases} 
                   onEdit={handleEditTestCase}
                   onDelete={confirmDeleteTestCase}
+                  onGenerateAI={handleGenerateAI}
                 />
               ))
             ) : (
@@ -170,6 +188,7 @@ export default function ProjectDetailsPage() {
                   allCases={testCases} 
                   onEdit={handleEditTestCase}
                   onDelete={confirmDeleteTestCase}
+                  onGenerateAI={handleGenerateAI}
                 />
               ))
             ) : (
@@ -207,7 +226,7 @@ export default function ProjectDetailsPage() {
   );
 }
 
-function TestCaseCard({ testCase, allCases, onEdit, onDelete }) {
+function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const children = allCases.filter(c => c.parentId === testCase._id);
 
@@ -233,8 +252,16 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete }) {
             <button 
               onClick={(e) => { e.stopPropagation(); onEdit(testCase); }}
               className="p-1.5 hover:bg-white/10 rounded-lg text-blue-400 transition-colors"
+              title="Edit"
             >
               <Edit size={16} />
+            </button>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onGenerateAI(testCase); }}
+              className="p-1.5 hover:bg-purple-500/10 rounded-lg text-purple-400 transition-colors"
+              title="Tạo test case tự động bằng AI"
+            >
+              <BrainCircuit size={16} />
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); onDelete(testCase); }}
