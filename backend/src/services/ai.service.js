@@ -29,12 +29,12 @@ export const generateTestCases = async (parent, language = 'vi') => {
     ${parent.category.toUpperCase() === 'HAPPY' ? `
     - THIS IS A HAPPY CASE GENERATION.
     - Generate ONLY happy path scenarios (successful outcomes).
-    - child test titles MUST end with "successful". Example: "Login successful".
+    - child test titles MUST end with "${language === 'vi' ? 'thành công' : 'successful'}". Example: "${language === 'vi' ? 'Đăng nhập thành công' : 'Login successful'}".
     - Do NOT include any error cases, invalid inputs, edge cases, or negative scenarios.
     ` : `
     - THIS IS AN UNHAPPY CASE GENERATION.
     - Generate ONLY unhappy path scenarios (failures, error states, invalid inputs, edge cases).
-    - child test titles MUST end with "failed". Example: "Login failed - wrong password".
+    - child test titles MUST end with "${language === 'vi' ? 'thất bại' : 'failed'}". Example: "${language === 'vi' ? 'Đăng nhập thất bại - sai mật khẩu' : 'Login failed - wrong password'}".
     - Do NOT include any successful or happy path scenarios.
     - FOR FORMS/INPUTS: Generate separate test cases for each individual required field being empty (e.g., if there are email and password fields, create one case for "Empty Email" and one for "Empty Password").
     - Ensure there is also a "All fields empty" case.
@@ -92,12 +92,12 @@ export const generateTestCasesFromImage = async (imagePath, category, language =
       ${category.toUpperCase() === 'HAPPY' ? `
       - THIS IS A HAPPY CASE GENERATION.
       - Generate ONLY happy path scenarios (successful outcomes).
-      - child test titles MUST end with "successful".
+      - child test titles MUST end with "${language === 'vi' ? 'thành công' : 'successful'}".
       - Do NOT include any error cases, invalid inputs, edge cases, or negative scenarios.
       ` : `
       - THIS IS AN UNHAPPY CASE GENERATION.
       - Generate ONLY unhappy path scenarios (failures, error states, invalid inputs, edge cases).
-      - child test titles MUST end with "failed".
+      - child test titles MUST end with "${language === 'vi' ? 'thất bại' : 'failed'}".
       - Do NOT include any successful or happy path scenarios.
       - FOR FORMS/INPUTS: Generate separate test cases for each individual required field being empty (e.g., if there are email and password fields, create one case for "Empty Email" and one for "Empty Password").
       - Ensure there is also a "All fields empty" case.

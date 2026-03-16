@@ -1,0 +1,53 @@
+Sheet Name: test
+Row Count: 1127
+
+--- HEADERS (Row 1) ---
+Col A (1): No.
+Col B (2): Title
+Col C (3): Big function
+Col D (4): Medium function
+Col E (5): Small function
+Col F (6): Severity
+Col G (7): Steps
+Col H (8): Test data
+Col I (9): Expected results
+Col J (10): Status (Test)
+Col K (11): Status (Dev)
+Col L (12): Note / Evidence 
+Col M (13): undefined
+Col N (14): undefined
+Col O (15): undefined
+
+--- DATA (Row 2) ---
+Col A (1): HAPPY CASE
+Col B (2): HAPPY CASE
+Col C (3): HAPPY CASE
+Col D (4): HAPPY CASE
+Col E (5): HAPPY CASE
+Col F (6): HAPPY CASE
+Col G (7): HAPPY CASE
+Col H (8): HAPPY CASE
+Col I (9): HAPPY CASE
+Col J (10): HAPPY CASE
+Col K (11): HAPPY CASE
+Col L (12): HAPPY CASE
+Col M (13): (empty)
+Col N (14): (empty)
+Col O (15): (empty)
+
+--- DATA (Row 3) ---
+Col A (1): (empty)
+Col B (2): (empty)
+Col C (3): (empty)
+Col D (4): (empty)
+Col E (5): (empty)
+Col F (6): (empty)
+Col G (7): (empty)
+Col H (8): (empty)
+Col I (9): (empty)
+Col J (10): (empty)
+Col K (11): (empty)
+Col L (12): (empty)
+Col M (13): (empty)
+Col N (14): (empty)
+Col O (15): (empty)
