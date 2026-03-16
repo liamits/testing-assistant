@@ -34,7 +34,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const navItems = [
     { label: t.dashboard, icon: LayoutDashboard, href: "/dashboard" },
     { label: t.projects, icon: FolderKanban, href: "/projects" },
-    { label: t.runs, icon: History, href: "/runs" },
+    { label: t.runs, icon: History, href: "#" },
     { label: t.settings, icon: Settings, href: "/admin/settings" },
   ];
 
@@ -73,13 +73,18 @@ export default function Sidebar({ isOpen, onClose }) {
             const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
             return (
               <a
-                key={item.href}
+                key={item.label}
                 href={item.href}
+                onClick={(e) => {
+                  if (item.href === "#") {
+                    e.preventDefault();
+                  }
+                }}
                 className={`flex items-center gap-3 p-3 rounded-xl transition-all font-medium ${
                   isActive
                     ? "text-blue-400 bg-blue-500/10 border border-blue-500/20 shadow-lg shadow-blue-500/5"
                     : "text-muted-contrast hover:text-high-contrast hover:bg-black/5"
-                }`}
+                } ${item.href === "#" ? "cursor-not-allowed opacity-60" : ""}`}
               >
                 <item.icon size={20} /> {item.label}
               </a>

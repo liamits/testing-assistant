@@ -7,6 +7,7 @@ import Sidebar from "../../components/common/Sidebar";
 import MobileNav from "../../components/common/MobileNav";
 import { useRouter } from "next/navigation";
 import api from "../../lib/api";
+import CreateProjectModal from "../../components/projects/CreateProjectModal";
 
 export default function DashboardPage() {
   const { user, systemLanguage } = useAuthStore();
@@ -19,19 +20,21 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get("/projects/dashboard/stats");
+      setStats(data);
+    } catch (err) {
+      console.error("Fetch stats error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-        const { data } = await api.get("/projects/dashboard/stats");
-        setStats(data);
-      } catch (err) {
-        console.error("Fetch stats error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchStats();
   }, []);
 
@@ -94,7 +97,7 @@ export default function DashboardPage() {
               <h1 className="text-2xl md:text-3xl font-bold text-high-contrast">{t.welcome} {user?.name || "User"}!</h1>
               <p className="text-muted-contrast mt-1 text-base md:text-lg">{t.subtitle}</p>
             </div>
-            <button className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center">
+            <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center">
               <Plus size={18} /> {t.newProject}
             </button>
           </header>
@@ -158,7 +161,7 @@ export default function DashboardPage() {
                         <div className="text-xs md:text-sm text-muted-contrast">{formatRelativeTime(activity.createdAt, systemLanguage)}</div>
                       </div>
                     </div>
-                    {/* <button onClick={() => router.push(`/projects/${activity.projectId?._id}`)} className="text-blue-400 hover:text-blue-300 font-medium underline-offset-4 hover:underline transition-all text-sm">{t.viewDetails}</button> */}
+                    <button onClick={() => router.push(`/projects/${activity.projectId?._id}`)} className="text-blue-400 hover:text-blue-300 font-medium underline-offset-4 hover:underline transition-all text-sm">{t.viewDetails}</button>
                   </div>
                 ))
               ) : (
@@ -169,6 +172,12 @@ export default function DashboardPage() {
             </div>
           </div>
         </main>
+
+        <CreateProjectModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onProjectCreated={fetchStats}
+        />
       </div>
     </AuthGuard>
   );
