@@ -118,6 +118,18 @@ export default function ProjectDetailsPage() {
     }
   };
 
+  const handleBulkDeleteTestCases = async (ids) => {
+    const toastId = toast.loading("Đang xóa các test case...");
+    try {
+      await api.post("/testcases/delete-bulk", { ids });
+      toast.success("Đã xóa các test case thành công!", { id: toastId });
+      fetchData();
+    } catch (err) {
+      console.error("Bulk delete error:", err);
+      toast.error("Lỗi khi xóa nhiều test case", { id: toastId });
+    }
+  };
+
   const handleExportExcel = async () => {
     const toastId = toast.loading("Đang chuẩn bị file Excel...");
     try {
@@ -321,6 +333,7 @@ export default function ProjectDetailsPage() {
                               onDelete={confirmDeleteTestCase}
                               onGenerateAI={handleGenerateAI}
                               onAddStep={() => openModal(tc.category, tc._id)}
+                              onBulkDelete={handleBulkDeleteTestCases}
                               dragHandleProps={provided.dragHandleProps}
                               isDragging={snapshot.isDragging}
                             />
@@ -422,9 +435,24 @@ export default function ProjectDetailsPage() {
   );
 }
 
-function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAddStep, dragHandleProps, isDragging }) {
+function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAddStep, onBulkDelete, dragHandleProps, isDragging }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
   const children = allCases.filter(c => c.parentId === testCase._id).sort((a, b) => (a.order||0) - (b.order||0));
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = (e) => {
+    e.stopPropagation();
+    if (window.confirm(`Bạn có chắc muốn xóa ${selectedIds.length} bước đã chọn?`)) {
+      onBulkDelete(selectedIds);
+      setSelectedIds([]);
+    }
+  };
 
   return (
     <div className={`group border rounded-xl overflow-hidden transition-all ${isDragging ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/20 scale-[1.02]' : 'border-white/5 bg-white/5 hover:border-white/10'}`}>
@@ -483,6 +511,21 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
 
       {isExpanded && (
         <div className="px-4 pb-4 space-y-2 border-t border-white/5 pt-4 bg-black/20 animate-slide-down">
+          {children.length > 0 && (
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs text-muted-contrast">
+                {selectedIds.length} / {children.length} đã chọn
+              </span>
+              {selectedIds.length > 0 && (
+                <button 
+                  onClick={handleBulkDelete}
+                  className="px-3 py-1 bg-red-500/20 text-red-400 text-xs rounded hover:bg-red-500/30 transition-colors flex items-center gap-1"
+                >
+                  <Trash2 size={12} /> Xóa các bước đã chọn
+                </button>
+              )}
+            </div>
+          )}
           <StrictModeDroppable droppableId={`steps-${testCase._id}`} type="step">
             {(provided) => (
               <div 
@@ -497,8 +540,15 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
                         <div 
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className={`group/step flex gap-3 text-sm p-2 rounded-lg transition-colors ${snapshot.isDragging ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-black/10 hover:bg-white/5'}`}
+                          className={`group/step flex gap-3 text-sm p-2 rounded-lg transition-colors items-center ${snapshot.isDragging ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-black/10 hover:bg-white/5'}`}
                         >
+                          <input 
+                            type="checkbox"
+                            checked={selectedIds.includes(child._id)}
+                            onChange={() => toggleSelect(child._id)}
+                            className="w-4 h-4 rounded border-white/10 bg-white/5 accent-blue-500 cursor-pointer"
+                            onClick={(e) => e.stopPropagation()}
+                          />
                           <div {...provided.dragHandleProps} className="text-slate-700 hover:text-slate-500 cursor-grab active:cursor-grabbing">
                             <GripVertical size={14} />
                           </div>

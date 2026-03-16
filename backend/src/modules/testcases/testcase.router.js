@@ -4,6 +4,7 @@ import {
   getTestCases, getTestCase,
   createTestCase, updateTestCase,
   deleteTestCase, bulkCreateTestCases,
+  bulkDeleteTestCases,
   generateAI, reorderTestCases
 } from "./testcase.controller.js";
 import { upload } from "../../middleware/upload.middleware.js";
@@ -19,5 +20,6 @@ router.put("/reorder", reorderTestCases);
 router.put("/:id", upload.single("screenshot"), updateTestCase);
 router.post("/:id/generate-ai", generateAI);
 router.delete("/:id", deleteTestCase);
+router.post("/delete-bulk", bulkDeleteTestCases);
 
 export default router;

@@ -110,6 +110,20 @@ export const deleteTestCase = async (req, res, next) => {
   }
 };
 
+export const bulkDeleteTestCases = async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({ message: "IDs must be an array" });
+    }
+    const result = await TestCase.deleteMany({ _id: { $in: ids } });
+    res.json({ message: `Deleted ${result.deletedCount} test cases` });
+  } catch (err) {
+    if (typeof next === "function") next(err);
+    else res.status(500).json({ message: err.message });
+  }
+};
+
 export const generateAI = async (req, res, next) => {
   try {
     const { id } = req.params;
