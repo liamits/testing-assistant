@@ -16,8 +16,8 @@
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  overflow: hidden;
   background: var(--bg-dark);
+  min-height: 100vh;
 }
 
 /* Base Animations */
@@ -56,13 +56,23 @@ body {
 }
 
 .login-card {
-  width: 900px;
-  height: 550px;
+  width: 100%;
+  max-width: 900px;
+  min-height: 550px;
   display: flex;
+  flex-direction: row;
   overflow: hidden;
   box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.2);
-  border-radius: 16px;
+  border-radius: 24px;
   background: white;
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    flex-direction: column;
+    height: auto;
+    min-height: auto;
+  }
 }
 
 .login-left {
@@ -83,7 +93,16 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 60px;
+  padding: 40px;
+}
+
+@media (max-width: 480px) {
+  .login-left {
+    padding: 40px 20px;
+  }
+  .login-right {
+    padding: 40px 20px;
+  }
 }
 
 /* Abstract decorations */

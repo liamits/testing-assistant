@@ -57,10 +57,10 @@ export default function LoginPage() {
           <div className="shape shape-4"></div>
           
           <div className="z-10 animate-slide" style={{ animationDelay: '0.2s' }}>
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-md border border-white/30">
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6 md:mb-8 backdrop-blur-md border border-white/30">
                 <Smartphone className="text-white" size={32} />
             </div>
-            <h1 className="text-5xl font-extrabold tracking-tight leading-tight">
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
               Welcome to <br /> 
               <span className="text-white/90">Testing assistant</span>
             </h1>

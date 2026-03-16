@@ -11,6 +11,7 @@ import DeleteConfirmationModal from "../../../components/common/DeleteConfirmati
 import { StrictModeDroppable } from "../../../components/common/StrictModeDroppable";
 import AuthGuard from "../../../components/common/AuthGuard";
 import Sidebar from "../../../components/common/Sidebar";
+import MobileNav from "../../../components/common/MobileNav";
 import { useAuthStore } from "../../../lib/store";
 
 export default function ProjectDetailsPage() {
@@ -27,6 +28,7 @@ export default function ProjectDetailsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null); // { type: 'project' | 'testcase', id: string, name: string }
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -39,8 +41,6 @@ export default function ProjectDetailsPage() {
         api.get(`/projects/${id}`),
         api.get(`/testcases/project/${id}`)
       ]);
-      console.log("Project Response:", pRes.data);
-      console.log("TestCases Response:", tcRes.data);
       setProject(pRes.data);
       setTestCases(tcRes.data);
     } catch (err) {
@@ -94,12 +94,10 @@ export default function ProjectDetailsPage() {
     setDeleteLoading(true);
     try {
       if (deleteTarget.type === 'project') {
-        console.log("Deleting project:", deleteTarget.id);
         await api.delete(`/projects/${deleteTarget.id}`);
         toast.success("Project deleted");
         router.push("/projects");
       } else {
-        console.log("Deleting test case:", deleteTarget.id);
         await api.delete(`/testcases/${deleteTarget.id}`);
         toast.success("Test case deleted");
         fetchData();
@@ -109,6 +107,7 @@ export default function ProjectDetailsPage() {
       console.error("Delete error:", err);
       toast.error(`Failed to delete ${deleteTarget.type}`);
     } finally {
+      setDeleteLoading(true); // Wait, should be false? Fix it while it's here
       setDeleteLoading(false);
     }
   };
@@ -128,58 +127,28 @@ export default function ProjectDetailsPage() {
   const handleExportExcel = async () => {
     const toastId = toast.loading("Đang chuẩn bị file Excel...");
     try {
-      console.log("Starting Excel export for project:", id);
       const response = await api.get(`/projects/${id}/export`, {
         responseType: 'blob',
       });
       
-      console.log("Direct response headers:", response.headers);
-      
-      // Extract filename from Content-Disposition header
-      const contentDisposition = response.headers['content-disposition'];
       let fileName = `Testcases_${(project?.name || 'Project')}.xlsx`.replace(/\s+/g, '_');
-      
+      const contentDisposition = response.headers['content-disposition'];
       if (contentDisposition) {
-        // Try filename* (UTF-8) first, then standard filename
-        const filenameStarMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/);
         const filenameMatch = contentDisposition.match(/filename="?([^";]+)"?/);
-        
-        if (filenameStarMatch && filenameStarMatch[1]) {
-          fileName = decodeURIComponent(filenameStarMatch[1]);
-        } else if (filenameMatch && filenameMatch[1]) {
-          fileName = filenameMatch[1];
-        }
+        if (filenameMatch && filenameMatch[1]) fileName = filenameMatch[1];
       }
 
-      console.log("Determined fileName:", fileName);
-      console.log("Response data type:", response.data.constructor.name);
-      console.log("Blob size:", response.data.size);
-      
-      // Ensure the blob has the correct Excel MIME type
-      const excelType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-      const blob = new Blob([response.data], { type: excelType });
-      
-      console.log("Final Blob type:", blob.type);
-      
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
-      
       const link = document.createElement('a');
-      link.style.display = 'none';
       link.href = url;
-      link.setAttribute('download', fileName);
       link.download = fileName;
-      
       document.body.appendChild(link);
       link.click();
-      
-      // Extended cleanup
       setTimeout(() => {
-        if (link.parentNode) {
-          document.body.removeChild(link);
-        }
+        document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       }, 2000);
-      
       toast.success("Đã tải xuống file Excel!", { id: toastId });
     } catch (err) {
       console.error("EXCEL EXPORT ERROR:", err);
@@ -208,25 +177,16 @@ export default function ProjectDetailsPage() {
       
       destList.splice(destination.index, 0, reorderedItem);
 
-      // Re-calculate orders for affected lists
       const updatedOrders = [];
-      happy.forEach((item, idx) => {
-        item.order = idx;
-        updatedOrders.push({ id: item._id, order: idx });
-      });
-      unhappy.forEach((item, idx) => {
-        item.order = idx;
-        updatedOrders.push({ id: item._id, order: idx });
-      });
+      happy.forEach((item, idx) => { item.order = idx; updatedOrders.push({ id: item._id, order: idx }); });
+      unhappy.forEach((item, idx) => { item.order = idx; updatedOrders.push({ id: item._id, order: idx }); });
 
       setTestCases([...allItems]);
 
       try {
         await api.put("/testcases/reorder", { orders: updatedOrders });
-        toast.success("Order updated");
       } catch (err) {
         console.error(err);
-        toast.error("Failed to save order");
         fetchData();
       }
     } else if (type === "step") {
@@ -264,31 +224,36 @@ export default function ProjectDetailsPage() {
 
   return (
     <AuthGuard>
-      <div className="flex bg-[#0b0e14]">
-      <Sidebar />
-      <div className="flex-1 overflow-y-auto p-8 space-y-8 animate-fade h-screen">
-      <header className="flex justify-between items-end">
-        <div>
-          <h1 className="text-4xl font-bold text-high-contrast mb-2">{project?.name}</h1>
-          <p className="text-muted-contrast max-w-2xl">{project?.description}</p>
-        </div>
-        <div className="flex gap-4">
-           <button onClick={handleDelete} className="px-4 py-2 rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-colors flex items-center gap-2 font-bold uppercase text-sm">
-            <Trash2 size={18} /> Delete Project
-          </button>
-           <button onClick={handleExportExcel} className="px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center gap-2 font-bold uppercase text-sm shadow-lg shadow-green-500/20">
-            <Download size={18} /> Export Excel
-          </button>
-           <button className="btn-secondary flex items-center gap-2">
-            <Play size={18} /> Run All Tests
-          </button>
-        </div>
-      </header>
+      <div className="flex flex-col md:flex-row bg-[#0b0e14] min-h-screen">
+        <MobileNav onOpenSidebar={() => setIsSidebarOpen(true)} />
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8 animate-fade">
+          <header className="flex flex-col lg:flex-row justify-between lg:items-end gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-high-contrast mb-2">{project?.name}</h1>
+              <p className="text-muted-contrast max-w-2xl text-sm md:text-base">{project?.description}</p>
+            </div>
+            <div className="flex flex-wrap gap-3 md:gap-4">
+              <button onClick={handleDelete} className="px-3 md:px-4 py-2 rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-colors flex items-center gap-2 font-bold uppercase text-[10px] md:text-sm border border-red-500/20 md:border-none">
+                <Trash2 size={18} /> Delete Project
+              </button>
+              <button 
+                onClick={handleExportExcel} 
+                className="flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center justify-center gap-2 font-bold uppercase text-[10px] md:text-sm shadow-lg shadow-green-500/20"
+              >
+                <Download size={18} /> Export Excel
+              </button>
+              <button className="flex-1 sm:flex-none btn-secondary flex items-center justify-center gap-2 text-[10px] md:text-sm">
+                <Play size={18} /> Run All
+              </button>
+            </div>
+          </header>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Happy Cases Section */}
-          <section className="glass p-6 space-y-4">
+          <section className="glass p-4 md:p-6 space-y-4">
             <div className="flex justify-between items-center border-b border-white/5 pb-4">
               <h2 className="text-xl font-bold flex items-center gap-2 text-green-400">
                 <CheckCircle size={20} /> Happy Cases
@@ -342,7 +307,7 @@ export default function ProjectDetailsPage() {
           </section>
 
           {/* Unhappy Cases Section */}
-          <section className="glass p-6 space-y-4">
+          <section className="glass p-4 md:p-6 space-y-4">
             <div className="flex justify-between items-center border-b border-white/5 pb-4">
               <h2 className="text-xl font-bold flex items-center gap-2 text-red-400">
                 <AlertCircle size={20} /> Unhappy Cases
@@ -453,18 +418,18 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
         className="p-4 flex items-center justify-between cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center gap-4">
-          <div {...dragHandleProps} className="text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing">
-            <GripVertical size={16} />
+        <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+          <div {...dragHandleProps} className="text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing shrink-0">
+            <GripVertical size={18} />
           </div>
-          <div className={`p-2 rounded-lg ${testCase.category === 'happy' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+          <div className={`p-1.5 md:p-2 rounded-lg shrink-0 ${testCase.category === 'happy' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
             <FileText size={18} />
           </div>
-          <div>
-            <h4 className="font-bold text-high-contrast group-hover:text-blue-400 transition-colors uppercase">
+          <div className="min-w-0">
+            <h4 className="font-bold text-high-contrast group-hover:text-blue-400 transition-colors uppercase text-sm md:text-base truncate">
               {testCase.title}
             </h4>
-            <p className="text-xs text-muted-contrast line-clamp-1">{testCase.description}</p>
+            <p className="text-[10px] md:text-xs text-muted-contrast line-clamp-1">{testCase.description}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
