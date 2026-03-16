@@ -8,6 +8,7 @@ import CreateProjectModal from "../../components/projects/CreateProjectModal";
 import EditProjectModal from "../../components/projects/EditProjectModal";
 import DeleteConfirmationModal from "../../components/common/DeleteConfirmationModal";
 import AuthGuard from "../../components/common/AuthGuard";
+import Sidebar from "../../components/common/Sidebar";
 import { useAuthStore } from "../../lib/store";
 
 export default function ProjectsPage() {
@@ -78,28 +79,8 @@ export default function ProjectsPage() {
 
   return (
     <AuthGuard>
-      <div className="flex h-screen bg-transparent">
-      {/* Sidebar - unified with dashboard theme */}
-      <aside className="w-64 border-r border-white/5 p-6 hidden md:block glass rounded-none flex flex-col">
-        <div className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 mb-12 tracking-tight">
-          TEST ASSIST
-        </div>
-        <nav className="space-y-3 flex-1">
-          <a href="/dashboard" className="flex items-center gap-3 text-muted-contrast hover:text-white hover:bg-white/5 p-3 rounded-xl transition-all font-medium">
-            <FolderKanban size={20} /> Dashboard
-          </a>
-          <a href="/projects" className="flex items-center gap-3 text-white bg-blue-500/20 p-3 rounded-xl border border-blue-500/20 shadow-lg shadow-blue-500/10 font-bold">
-            <FolderKanban size={20} /> Projects
-          </a>
-        </nav>
-
-        <button 
-          onClick={handleLogout}
-          className="flex items-center gap-3 text-red-400 hover:bg-red-400/10 p-3 rounded-xl transition-all font-bold mt-auto w-full text-left"
-        >
-          <LogOut size={20} /> Log Out
-        </button>
-      </aside>
+      <div className="flex bg-transparent">
+      <Sidebar />
 
       <main className="flex-1 overflow-y-auto p-10">
         <header className="flex justify-between items-center mb-12">

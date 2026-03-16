@@ -5,6 +5,7 @@ export const useAuthStore = create((set) => ({
   user: null,
   token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
   isInitialized: false,
+  systemLanguage: "vi",
 
   login: async ({ identifier, password }) => {
     const { data } = await api.post("/auth/login", { identifier, password });
@@ -32,6 +33,27 @@ export const useAuthStore = create((set) => ({
     } catch {
       localStorage.removeItem("token");
       set({ user: null, token: null, isInitialized: true });
+    }
+  },
+
+  fetchSettings: async () => {
+    try {
+      const { data } = await api.get("/settings");
+      set({ systemLanguage: data.systemLanguage || "vi" });
+      return data;
+    } catch (err) {
+      console.error("Failed to fetch settings:", err);
+    }
+  },
+
+  updateSystemLanguage: async (value) => {
+    try {
+      await api.post("/settings", { key: "systemLanguage", value });
+      set({ systemLanguage: value });
+      toast.success("Ngôn ngữ hệ thống đã được cập nhật");
+    } catch (err) {
+      console.error("Failed to update language:", err);
+      toast.error("Lỗi khi cập nhật ngôn ngữ");
     }
   },
 }));

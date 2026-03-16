@@ -9,6 +9,7 @@ import projectRouter from "./modules/projects/project.router.js";
 import testcaseRouter from "./modules/testcases/testcase.router.js";
 import aiRouter from "./modules/ai/ai.router.js";
 import runnerRouter from "./modules/runner/runner.router.js";
+import settingsRouter from "./modules/settings/settings.router.js";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use("/api/projects", projectRouter);
 app.use("/api/testcases", testcaseRouter);
 app.use("/api/ai", aiRouter);
 app.use("/api/runner", runnerRouter);
+app.use("/api/settings", settingsRouter);
 
 app.use(errorMiddleware);
 

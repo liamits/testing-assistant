@@ -10,7 +10,6 @@ export default function EditProjectModal({ isOpen, onClose, onProjectUpdated, pr
     name: "",
     description: "",
     baseUrl: "",
-    defaultLanguage: "vi",
   });
 
   useEffect(() => {
@@ -19,7 +18,6 @@ export default function EditProjectModal({ isOpen, onClose, onProjectUpdated, pr
         name: project.name || "",
         description: project.description || "",
         baseUrl: project.baseUrl || "",
-        defaultLanguage: project.defaultLanguage || "vi",
       });
     }
   }, [project, isOpen]);
@@ -89,18 +87,6 @@ export default function EditProjectModal({ isOpen, onClose, onProjectUpdated, pr
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast h-24 resize-none focus:border-blue-500/50 outline-none transition-all"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-muted-contrast mb-2">Ngôn ngữ mặc định (AI Generation)</label>
-              <select
-                value={formData.defaultLanguage}
-                onChange={(e) => setFormData({ ...formData, defaultLanguage: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all appearance-none cursor-pointer"
-              >
-                <option value="vi" className="bg-slate-900">Tiếng Việt</option>
-                <option value="en" className="bg-slate-900">English</option>
-              </select>
             </div>
           </div>
 

@@ -10,6 +10,7 @@ import EditTestCaseModal from "../../../components/testcases/EditTestCaseModal";
 import DeleteConfirmationModal from "../../../components/common/DeleteConfirmationModal";
 import { StrictModeDroppable } from "../../../components/common/StrictModeDroppable";
 import AuthGuard from "../../../components/common/AuthGuard";
+import Sidebar from "../../../components/common/Sidebar";
 import { useAuthStore } from "../../../lib/store";
 
 export default function ProjectDetailsPage() {
@@ -269,7 +270,9 @@ export default function ProjectDetailsPage() {
 
   return (
     <AuthGuard>
-      <div className="p-8 space-y-8 animate-fade">
+      <div className="flex bg-[#0b0e14]">
+      <Sidebar />
+      <div className="flex-1 overflow-y-auto p-8 space-y-8 animate-fade h-screen">
       <header className="flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-bold text-high-contrast mb-2">{project?.name}</h1>
@@ -430,6 +433,7 @@ export default function ProjectDetailsPage() {
         message={`Are you sure you want to delete "${deleteTarget?.name}"? This action will remove all associated data and cannot be undone.`}
         loading={deleteLoading}
       />
+      </div>
       </div>
     </AuthGuard>
   );

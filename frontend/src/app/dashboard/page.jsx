@@ -1,13 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../../lib/store";
-import { LayoutDashboard, FolderKanban, FlaskConical, History, Plus, LogOut } from "lucide-react";
 import AuthGuard from "../../components/common/AuthGuard";
+import Sidebar from "../../components/common/Sidebar";
 import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
   const router = useRouter();
   const [stats, setStats] = useState({ projects: 0, testCases: 0, runs: 0 });
 
@@ -18,31 +17,8 @@ export default function DashboardPage() {
 
   return (
     <AuthGuard>
-      <div className="flex h-screen bg-[#0b0e14]">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-[#1e293b] p-6 hidden md:block flex flex-col">
-        <div className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-10">
-          Testing Assistant
-        </div>
-        <nav className="space-y-4 flex-1">
-          <a href="/dashboard" className="flex items-center gap-3 text-blue-400 bg-blue-500/10 p-3 rounded-lg">
-            <LayoutDashboard size={20} /> Dashboard
-          </a>
-          <a href="/projects" className="flex items-center gap-3 text-gray-400 hover:text-white p-3 transition-colors">
-            <FolderKanban size={20} /> Projects
-          </a>
-          <a href="/runs" className="flex items-center gap-3 text-gray-400 hover:text-white p-3 transition-colors">
-            <History size={20} /> Latest Runs
-          </a>
-        </nav>
-        
-        <button 
-          onClick={handleLogout}
-          className="flex items-center gap-3 text-red-400 hover:bg-red-400/10 p-3 rounded-lg transition-colors mt-auto w-full text-left"
-        >
-          <LogOut size={20} /> Log Out
-        </button>
-      </aside>
+      <div className="flex bg-[#0b0e14]">
+      <Sidebar />
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-8">
