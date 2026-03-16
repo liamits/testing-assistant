@@ -6,6 +6,45 @@ import path from "path";
 import fs from "fs";
 import { translateTestCases } from "../../services/ai.service.js";
 
+export const getDashboardStats = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    
+    // 1. Total Projects
+    const totalProjects = await Project.countDocuments({ userId });
+    
+    // 2. Total active Test Cases (for all user's projects)
+    const projects = await Project.find({ userId }).select('_id');
+    const projectIds = projects.map(p => p._id);
+    
+    const activeTestCases = await TestCase.countDocuments({ 
+      projectId: { $in: projectIds }
+    });
+    
+    // 3. Successful Runs Percentage
+    const testRuns = await TestRun.find({ projectId: { $in: projectIds } });
+    let successfulRunsCount = testRuns.filter(run => run.status === 'COMPLETED').length;
+    let successPercentage = testRuns.length > 0 ? Math.round((successfulRunsCount / testRuns.length) * 100) : 0;
+
+    // 4. Recent Activity
+    const recentActivity = await TestRun.find({ projectId: { $in: projectIds } })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('projectId', 'name')
+      .lean();
+
+    res.json({
+      totalProjects,
+      activeTestCases,
+      successPercentage,
+      recentActivity
+    });
+  } catch (err) {
+    if (typeof next === "function") next(err);
+    else res.status(500).json({ message: err.message });
+  }
+};
+
 export const getProjects = async (req, res, next) => {
   try {
     const projects = await Project.find({ userId: req.user.id }).sort({ updatedAt: -1 }).lean();

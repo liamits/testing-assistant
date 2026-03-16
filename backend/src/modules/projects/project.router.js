@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middleware/auth.middleware.js";
 import {
-  getProjects, getProject,
+  getProjects, getProject, getDashboardStats,
   createProject, updateProject, deleteProject,
   exportProjectTestCases, translateProjectTestCases
 } from "./project.controller.js";
@@ -10,6 +10,7 @@ import {
 const router = Router();
 router.use(authMiddleware);
 
+router.get("/dashboard/stats", getDashboardStats);
 router.get("/", getProjects);
 router.get("/:id", getProject);
 router.get("/:id/export", exportProjectTestCases);

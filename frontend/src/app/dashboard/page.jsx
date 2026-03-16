@@ -6,12 +6,54 @@ import AuthGuard from "../../components/common/AuthGuard";
 import Sidebar from "../../components/common/Sidebar";
 import MobileNav from "../../components/common/MobileNav";
 import { useRouter } from "next/navigation";
+import api from "../../lib/api";
 
 export default function DashboardPage() {
   const { user, systemLanguage } = useAuthStore();
   const router = useRouter();
-  const [stats, setStats] = useState({ projects: 0, testCases: 0, runs: 0 });
+  const [stats, setStats] = useState({ 
+    totalProjects: 0, 
+    activeTestCases: 0, 
+    successPercentage: 0, 
+    recentActivity: [] 
+  });
+  const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const { data } = await api.get("/projects/dashboard/stats");
+        setStats(data);
+      } catch (err) {
+        console.error("Fetch stats error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const formatRelativeTime = (dateString, lang) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return lang === 'vi' ? 'vừa xong' : 'just now';
+    
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes}${lang === 'vi' ? ' phút' : 'm'} ${lang === 'vi' ? 'trước' : 'ago'}`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}${lang === 'vi' ? ' giờ' : 'h'} ${lang === 'vi' ? 'trước' : 'ago'}`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 30) return `${diffInDays}${lang === 'vi' ? ' ngày' : 'd'} ${lang === 'vi' ? 'trước' : 'ago'}`;
+    
+    return date.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US');
+  };
 
   const translations = {
     vi: {
@@ -66,7 +108,9 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-muted-contrast text-sm font-medium">{t.totalProjects}</span>
               </div>
-              <div className="text-3xl md:text-4xl font-extrabold text-high-contrast">12</div>
+              <div className="text-3xl md:text-4xl font-extrabold text-high-contrast">
+                {loading ? <span className="animate-pulse text-slate-500">...</span> : stats.totalProjects}
+              </div>
             </div>
             <div className="glass p-6">
               <div className="flex items-center justify-between mb-4">
@@ -75,7 +119,9 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-muted-contrast text-sm font-medium">{t.activeTestCases}</span>
               </div>
-              <div className="text-3xl md:text-4xl font-extrabold text-high-contrast">458</div>
+              <div className="text-3xl md:text-4xl font-extrabold text-high-contrast">
+                {loading ? <span className="animate-pulse text-slate-500">...</span> : stats.activeTestCases}
+              </div>
             </div>
             <div className="glass p-6 sm:col-span-2 lg:col-span-1">
               <div className="flex items-center justify-between mb-4">
@@ -84,7 +130,9 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-muted-contrast text-sm font-medium">{t.successfulRuns}</span>
               </div>
-              <div className="text-3xl md:text-4xl font-extrabold text-high-contrast">89%</div>
+              <div className="text-3xl md:text-4xl font-extrabold text-high-contrast">
+                {loading ? <span className="animate-pulse text-slate-500">...</span> : `${stats.successPercentage}%`}
+              </div>
             </div>
           </div>
 
@@ -92,18 +140,32 @@ export default function DashboardPage() {
           <div className="glass p-6 md:p-8">
             <h2 className="text-xl md:text-2xl font-bold text-high-contrast mb-6 md:mb-8">{t.recentActivity}</h2>
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-glass)] hover:bg-[var(--border-glass)] transition-colors gap-4">
-                  <div className="flex items-center gap-4 sm:gap-5">
-                    <div className={`shrink-0 w-3 h-3 rounded-full shadow-lg ${i === 2 ? 'bg-red-500 shadow-red-500/50' : 'bg-green-500 shadow-green-500/50'}`} />
-                    <div>
-                      <div className="font-semibold text-high-contrast text-base md:text-lg line-clamp-1">Test Run #{i}245 - E-commerce App</div>
-                      <div className="text-xs md:text-sm text-muted-contrast">2 hours ago</div>
-                    </div>
-                  </div>
-                  <button className="text-blue-400 hover:text-blue-300 font-medium underline-offset-4 hover:underline transition-all text-sm">{t.viewDetails}</button>
+              {loading ? (
+                <div className="animate-pulse flex flex-col gap-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-20 bg-white/5 rounded-xl border border-white/5"></div>
+                  ))}
                 </div>
-              ))}
+              ) : stats.recentActivity.length > 0 ? (
+                stats.recentActivity.map((activity, idx) => (
+                  <div key={activity._id || idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-glass)] hover:bg-[var(--border-glass)] transition-colors gap-4">
+                    <div className="flex items-center gap-4 sm:gap-5">
+                      <div className={`shrink-0 w-3 h-3 rounded-full shadow-lg ${activity.status === 'FAILED' ? 'bg-red-500 shadow-red-500/50' : 'bg-green-500 shadow-green-500/50'}`} />
+                      <div>
+                        <div className="font-semibold text-high-contrast text-base md:text-lg line-clamp-1">
+                          {activity.name} - {activity.projectId?.name || "Project"}
+                        </div>
+                        <div className="text-xs md:text-sm text-muted-contrast">{formatRelativeTime(activity.createdAt, systemLanguage)}</div>
+                      </div>
+                    </div>
+                    {/* <button onClick={() => router.push(`/projects/${activity.projectId?._id}`)} className="text-blue-400 hover:text-blue-300 font-medium underline-offset-4 hover:underline transition-all text-sm">{t.viewDetails}</button> */}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center p-8 text-muted-contrast border border-dashed border-[var(--border-glass)] rounded-xl">
+                  {systemLanguage === 'vi' ? 'Chưa có hoạt động nào gần đây.' : 'No recent activity.'}
+                </div>
+              )}
             </div>
           </div>
         </main>
