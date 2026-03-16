@@ -259,12 +259,6 @@ export default function ProjectDetailsPage() {
                 <Trash2 size={18} /> Delete Project
               </button>
               <button 
-                onClick={handleTranslateProject} 
-                className="flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors flex items-center justify-center gap-2 font-bold uppercase text-[10px] md:text-sm border border-blue-500/30"
-              >
-                <Languages size={18} /> Translate All
-              </button>
-              <button 
                 onClick={handleExportExcel} 
                 className="flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-600 transition-colors flex items-center justify-center gap-2 font-bold uppercase text-[10px] md:text-sm shadow-lg shadow-green-500/20"
               >
@@ -457,7 +451,7 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
   };
 
   return (
-    <div className={`group border rounded-xl overflow-hidden transition-all ${isDragging ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/20 scale-[1.02]' : 'border-white/5 bg-white/5 hover:border-white/10'}`}>
+    <div className={`group border rounded-xl overflow-hidden transition-all ${isDragging ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/20 scale-[1.02]' : 'border-[var(--border-glass)] bg-[var(--bg-card)] hover:border-[var(--border-glass)]'}`}>
       <div 
         className="p-4 flex items-center justify-between cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -500,7 +494,7 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
             </button>
           </div>
           {children.length > 0 && (
-            <span className="text-[10px] px-2 py-0.5 bg-white/5 rounded-full text-muted-contrast uppercase">
+            <span className="text-[10px] px-2 py-0.5 bg-[var(--border-glass)] rounded-full text-muted-contrast uppercase">
               {children.length} steps
             </span>
           )}
@@ -512,7 +506,7 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
       </div>
 
       {isExpanded && (
-        <div className="px-4 pb-4 space-y-2 border-t border-white/5 pt-4 bg-black/20 animate-slide-down">
+        <div className="px-4 pb-4 space-y-2 border-t border-[var(--border-glass)] pt-4 bg-[var(--bg-main)] animate-slide-down">
           {children.length > 0 && (
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs text-muted-contrast">
@@ -542,14 +536,13 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
                         <div 
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className={`group/step flex gap-3 text-sm p-2 rounded-lg transition-colors items-center ${snapshot.isDragging ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-black/10 hover:bg-white/5'}`}
-                          className={`group/step flex gap-3 text-sm p-2 rounded-lg transition-colors items-center ${snapshot.isDragging ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-black/10 hover:bg-[var(--border-glass)]'}`}
+                          className={`group/step flex gap-3 text-sm p-2 rounded-lg transition-colors items-center ${snapshot.isDragging ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-[var(--bg-card)] border border-[var(--border-glass)] hover:bg-[var(--border-glass)]'}`}
                         >
                           <input 
                             type="checkbox"
                             checked={selectedIds.includes(child._id)}
                             onChange={() => toggleSelect(child._id)}
-                            className="w-4 h-4 rounded border-white/10 bg-white/5 accent-blue-500 cursor-pointer"
+                            className="w-4 h-4 rounded border-[var(--border-glass)] bg-[var(--bg-main)] accent-blue-500 cursor-pointer"
                             onClick={(e) => e.stopPropagation()}
                           />
                           <div {...provided.dragHandleProps} className="text-slate-700 hover:text-slate-500 cursor-grab active:cursor-grabbing">
@@ -588,7 +581,7 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
 
           <button 
             onClick={(e) => { e.stopPropagation(); onAddStep(); }}
-            className="w-full mt-2 p-2 border border-dashed border-white/10 rounded-lg text-xs text-muted-contrast hover:text-white hover:border-white/20 transition-all flex items-center justify-center gap-2"
+            className="w-full mt-2 p-2 border border-dashed border-[var(--border-glass)] rounded-lg text-xs text-muted-contrast hover:text-[var(--text-high)] hover:border-slate-500/50 transition-all flex items-center justify-center gap-2"
           >
             <Plus size={14} /> Add Manual Step
           </button>

@@ -82,7 +82,21 @@ export const getProjects = async (req, res, next) => {
 
 export const getProject = async (req, res, next) => {
   try {
-    const project = await Project.findOne({ _id: req.params.id, userId: req.user.id }).lean();
+    const { id } = req.params;
+    let query;
+    import('mongoose').then(mongoose => {
+       if (mongoose.isValidObjectId(id)) {
+           query = { _id: id, userId: req.user.id };
+       } else {
+           query = { name: new RegExp(`^${id}$`, 'i'), userId: req.user.id };
+       }
+    });
+
+    const isMatch = (str) => { return str.length === 24 && /^[0-9a-fA-F]{24}$/.test(str); }
+
+    const finalQuery = isMatch(id) ? { _id: id, userId: req.user.id } : { name: new RegExp(`^${id}$`, 'i'), userId: req.user.id };
+
+    const project = await Project.findOne(finalQuery).lean();
     if (!project) return res.status(404).json({ message: "Project not found" });
 
     const testCases = await TestCase.find({ projectId: project._id }).sort({ createdAt: -1 });
