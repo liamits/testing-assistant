@@ -110,7 +110,7 @@ export default function ProjectsPage() {
 
   return (
     <AuthGuard>
-      <div className="flex flex-col md:flex-row bg-[#0b0e14] min-h-screen">
+      <div className="flex flex-col md:flex-row bg-[var(--bg-main)] min-h-screen">
         <MobileNav onOpenSidebar={() => setIsSidebarOpen(true)} />
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 

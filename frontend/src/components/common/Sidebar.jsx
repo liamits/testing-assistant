@@ -1,11 +1,11 @@
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, FolderKanban, History, Settings, LogOut, X } from "lucide-react";
+import { LayoutDashboard, FolderKanban, History, Settings, LogOut, X, Sun, Moon } from "lucide-react";
 import { useAuthStore } from "../../lib/store";
 
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname();
-  const router = useRouter(); // Added router as it was used in handleLogout but not imported/defined correctly in previous version
-  const { user, logout, systemLanguage } = useAuthStore();
+  const router = useRouter();
+  const { user, logout, systemLanguage, theme, toggleTheme } = useAuthStore();
 
   const handleLogout = () => {
     logout();
@@ -51,7 +51,7 @@ export default function Sidebar({ isOpen, onClose }) {
       <aside className={`
         fixed md:sticky top-0 left-0 z-50
         w-64 h-screen 
-        bg-[#0b0e14] border-r border-[#1e293b] 
+        bg-[var(--sidebar-bg)] border-r border-white/5 
         p-6 flex flex-col 
         transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
@@ -87,12 +87,25 @@ export default function Sidebar({ isOpen, onClose }) {
           })}
         </nav>
 
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 text-red-400 hover:bg-red-400/10 p-3 rounded-xl transition-all font-bold mt-auto w-full text-left"
-        >
-          <LogOut size={20} /> {t.logout}
-        </button>
+        <div className="space-y-3 mt-auto">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 p-3 rounded-xl transition-all font-medium text-muted-contrast hover:text-high-contrast hover:bg-white/5 w-full text-left"
+          >
+            {theme === "dark" ? (
+              <><Sun size={20} /> Light Mode</>
+            ) : (
+              <><Moon size={20} /> Dark Mode</>
+            )}
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 text-red-400 hover:bg-red-400/10 p-3 rounded-xl transition-all font-bold w-full text-left"
+          >
+            <LogOut size={20} /> {t.logout}
+          </button>
+        </div>
       </aside>
     </>
   );

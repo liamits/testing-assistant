@@ -6,6 +6,15 @@ export const useAuthStore = create((set) => ({
   token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
   isInitialized: false,
   systemLanguage: "vi",
+  theme: typeof window !== "undefined" ? (localStorage.getItem("theme") || "dark") : "dark",
+
+  toggleTheme: () => {
+    set((state) => {
+      const newTheme = state.theme === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", newTheme);
+      return { theme: newTheme };
+    });
+  },
 
   login: async ({ identifier, password }) => {
     const { data } = await api.post("/auth/login", { identifier, password });
