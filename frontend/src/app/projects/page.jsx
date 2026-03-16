@@ -12,6 +12,37 @@ import Sidebar from "../../components/common/Sidebar";
 import MobileNav from "../../components/common/MobileNav";
 import { useAuthStore } from "../../lib/store";
 
+const formatDateTime = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${hours}:${minutes} ${day}/${month}/${year}`;
+};
+
+const formatRelativeTime = (dateString, lang) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+
+  if (diffInSeconds < 60) return lang === 'vi' ? 'vừa xong' : 'just now';
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}${lang === 'vi' ? ' phút' : 'm'} ${lang === 'vi' ? 'trước' : 'ago'}`;
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}${lang === 'vi' ? ' giờ' : 'h'} ${lang === 'vi' ? 'trước' : 'ago'}`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 30) return `${diffInDays}${lang === 'vi' ? ' ngày' : 'd'} ${lang === 'vi' ? 'trước' : 'ago'}`;
+
+  return date.toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US');
+};
+
 export default function ProjectsPage() {
   const { logout, systemLanguage } = useAuthStore();
   const router = useRouter();
@@ -54,7 +85,7 @@ export default function ProjectsPage() {
   const t = translations[systemLanguage || 'vi'];
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -126,10 +157,10 @@ export default function ProjectsPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-8 md:mb-10">
             <div className="relative flex-1 group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-contrast group-focus-within:text-blue-400 transition-colors" size={20} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder={t.searchPlaceholder}
-                className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-2xl py-3 md:py-4 pl-12 pr-4 text-high-contrast placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all text-base md:text-lg" 
+                className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-2xl py-3 md:py-4 pl-12 pr-4 text-high-contrast placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all text-base md:text-lg"
               />
             </div>
             <button className="glass px-6 py-3 sm:py-0 flex items-center gap-2 text-high-contrast font-bold hover:bg-white/10 transition-colors justify-center">
@@ -146,29 +177,29 @@ export default function ProjectsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {projects.length > 0 ? projects.map((p) => (
-                <div 
-                  key={p.id || p._id} 
+                <div
+                  key={p.id || p._id}
                   onClick={() => router.push(`/projects/${p.id || p._id}`)}
                   className="glass p-6 md:p-8 hover:transform hover:-translate-y-1 transition-all duration-300 border-[var(--border-glass)] group hover:border-blue-500/30 cursor-pointer"
                 >
                   <div className="flex justify-between items-start mb-6">
                     <div className="p-3 md:p-4 bg-blue-500/10 rounded-2xl text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300 shadow-inner">
-                    <FolderKanban size={28} strokeWidth={2.5} />
-                  </div>
+                      <FolderKanban size={28} strokeWidth={2.5} />
+                    </div>
                     <div className="relative">
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setOpenMenuId(openMenuId === (p.id || p._id) ? null : (p.id || p._id));
                         }}
                         className="text-muted-contrast hover:text-white p-2 hover:bg-white/5 rounded-lg transition-colors"
-                    >
-                      <MoreVertical size={24} />
-                    </button>
-                      
+                      >
+                        <MoreVertical size={24} />
+                      </button>
+
                       {openMenuId === (p.id || p._id) && (
                         <div className="absolute right-0 mt-2 w-44 md:w-48 glass border-white/10 shadow-2xl z-10 py-2 animate-fade overflow-hidden">
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleEdit(p);
@@ -177,7 +208,7 @@ export default function ProjectsPage() {
                           >
                             <Edit size={16} className="text-blue-400" /> {t.editProject}
                           </button>
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDelete(p.id || p._id, p.name);
@@ -194,16 +225,29 @@ export default function ProjectsPage() {
                   <p className="text-muted-contrast text-sm md:text-base leading-relaxed line-clamp-2 mb-6 md:mb-8 font-medium">
                     {p.description || "Establish a robust foundation for this testing project."}
                   </p>
-                  <div className="flex items-center justify-between pt-4 md:pt-6 border-t border-white/10">
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-xs md:text-sm text-blue-400 font-bold bg-blue-500/10 px-2 md:px-3 py-1 rounded-full border border-blue-500/10">
-                        {p._count?.testCases || 0} {t.scenariosCount}
-                      </span>
+                  <div className="flex flex-col gap-3 pt-4 md:pt-6 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-xs md:text-sm text-blue-400 font-bold bg-blue-500/10 px-2 md:px-3 py-1 rounded-full border border-blue-500/10">
+                          {p._count?.testCases || 0} {t.scenariosCount}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-[10px] md:text-xs text-slate-500 font-semibold italic">
+                          {t.modified} {formatRelativeTime(p.updatedAt, systemLanguage)}
+                        </span>
+                        <span className="text-[9px] md:text-[10px] text-slate-400 font-medium opacity-80">
+                          {systemLanguage === 'vi' ? 'Cập nhật lần cuối lúc:' : 'Last updated at:'} {formatDateTime(p.updatedAt)}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[10px] md:text-xs text-slate-500 font-semibold italic">
-                      {t.modified} 2h {t.ago}
-                    </span>
+                    {p._count?.totalTestCases > 0 && (
+                      <div className="text-[10px] md:text-xs text-muted-contrast font-medium flex items-center gap-1.5 pl-1 opacity-80">
+                        <span className="w-1 h-1 rounded-full bg-slate-500" />
+                        {systemLanguage === 'vi' ? 'Tổng cộng' : 'Total'}: {p._count.totalTestCases} {systemLanguage === 'vi' ? 'kịch bản con' : 'sub-scenarios'}
+                      </div>
+                    )}
                   </div>
                 </div>
               )) : (
@@ -224,9 +268,9 @@ export default function ProjectsPage() {
           )}
         </main>
 
-        <CreateProjectModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
+        <CreateProjectModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
           onProjectCreated={fetchProjects}
         />
 

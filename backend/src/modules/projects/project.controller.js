@@ -12,9 +12,26 @@ export const getProjects = async (req, res, next) => {
     
     // Thêm count manually hoặc dùng aggregate nếu cần hiệu năng cao
     const projectsWithCount = await Promise.all(projects.map(async (p) => {
-      const testCaseCount = await TestCase.countDocuments({ projectId: p._id });
+      const parentCount = await TestCase.countDocuments({ projectId: p._id, parentId: { $in: [null, undefined] } });
+      const totalCount = await TestCase.countDocuments({ projectId: p._id });
       const testRunCount = await TestRun.countDocuments({ projectId: p._id });
-      return { ...p, id: p._id, _count: { testCases: testCaseCount, testRuns: testRunCount } };
+      
+      // Tìm kịch bản có cập nhật mới nhất
+      const latestTestCase = await TestCase.findOne({ projectId: p._id }).sort({ updatedAt: -1 }).select('updatedAt').lean();
+      const lastActivity = latestTestCase 
+        ? new Date(Math.max(new Date(p.updatedAt), new Date(latestTestCase.updatedAt)))
+        : p.updatedAt;
+
+      return { 
+        ...p, 
+        id: p._id, 
+        updatedAt: lastActivity,
+        _count: { 
+          testCases: parentCount, 
+          totalTestCases: totalCount,
+          testRuns: testRunCount 
+        } 
+      };
     }));
 
     res.json(projectsWithCount);
