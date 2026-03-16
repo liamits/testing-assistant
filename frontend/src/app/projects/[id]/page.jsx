@@ -16,12 +16,6 @@ import { useAuthStore } from "../../../lib/store";
 export default function ProjectDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
-  const logout = useAuthStore((state) => state.logout);
-  
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
   const [project, setProject] = useState(null);
   const [testCases, setTestCases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -288,12 +282,6 @@ export default function ProjectDetailsPage() {
            <button className="btn-secondary flex items-center gap-2">
             <Play size={18} /> Run All Tests
           </button>
-          <button 
-            onClick={handleLogout}
-            className="px-4 py-2 rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-colors flex items-center gap-2 font-bold uppercase text-sm"
-          >
-            <LogOut size={18} /> Log Out
-          </button>
         </div>
       </header>
 
@@ -390,6 +378,7 @@ export default function ProjectDetailsPage() {
                               onDelete={confirmDeleteTestCase}
                               onGenerateAI={handleGenerateAI}
                               onAddStep={() => openModal(tc.category, tc._id)}
+                              onBulkDelete={handleBulkDeleteTestCases}
                               dragHandleProps={provided.dragHandleProps}
                               isDragging={snapshot.isDragging}
                             />
