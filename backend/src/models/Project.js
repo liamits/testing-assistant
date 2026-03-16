@@ -8,6 +8,7 @@ const projectSchema = new mongoose.Schema({
   businessFlow: { type: String },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  defaultLanguage: { type: String, enum: ['vi', 'en'], default: 'vi' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 }, { timestamps: true });

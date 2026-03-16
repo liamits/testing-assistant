@@ -38,7 +38,7 @@ export const getProject = async (req, res, next) => {
 
 export const createProject = async (req, res, next) => {
   try {
-    const { name, description, baseUrl } = req.body;
+    const { name, description, baseUrl, defaultLanguage } = req.body;
     if (!name || !baseUrl) {
       return res.status(400).json({ message: "Project Name and Base URL are required" });
     }
@@ -47,7 +47,8 @@ export const createProject = async (req, res, next) => {
       name, 
       description, 
       baseUrl,
-      userId: req.user.id 
+      userId: req.user.id,
+      defaultLanguage: defaultLanguage || 'vi'
     });
     
     await project.save();
@@ -64,10 +65,10 @@ export const createProject = async (req, res, next) => {
 
 export const updateProject = async (req, res, next) => {
   try {
-    const { name, description, baseUrl } = req.body;
+    const { name, description, baseUrl, defaultLanguage } = req.body;
     const project = await Project.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
-      { name, description, baseUrl },
+      { name, description, baseUrl, defaultLanguage },
       { new: true }
     );
     if (!project) return res.status(404).json({ message: "Project not found" });

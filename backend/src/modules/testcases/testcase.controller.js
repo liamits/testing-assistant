@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import fs from "fs";
 import path from "path";
 import { TestCase } from "../../models/TestCase.js";
+import { Project } from "../../models/Project.js";
 import { generateTestCases, generateTestCasesFromImage } from "../../services/ai.service.js";
 
 export const getTestCases = async (req, res, next) => {
@@ -141,8 +142,12 @@ export const generateAI = async (req, res, next) => {
       return res.status(404).json({ message: "Screenshot file not found on server" });
     }
 
+    // Get project language
+    const project = await Project.findById(tc.projectId);
+    const language = project?.defaultLanguage || 'vi';
+
     // Generate test cases from image
-    const childrenData = await generateTestCasesFromImage(imagePath, tc.category);
+    const childrenData = await generateTestCasesFromImage(imagePath, tc.category, language);
     
     // Save as children
     const children = childrenData.map(child => ({

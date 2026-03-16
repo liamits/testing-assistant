@@ -9,9 +9,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 /**
  * Generates child test cases based on parent description and business flow.
  * @param {Object} parent - Parent test case data { title, description, flow, category }
+ * @param {string} language - 'vi' or 'en'
  * @returns {Promise<Array>} List of generated test cases
  */
-export const generateTestCases = async (parent) => {
+export const generateTestCases = async (parent, language = 'vi') => {
   const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const prompt = `
@@ -22,6 +23,7 @@ export const generateTestCases = async (parent) => {
     - Description: ${parent.description}
     - Business Flow: ${parent.flow}
     - Category: ${parent.category.toUpperCase()}
+    - OUTPUT LANGUAGE: ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}
 
     CRITICAL REQUIREMENTS BY CATEGORY:
     ${parent.category.toUpperCase() === 'HAPPY' ? `
@@ -39,6 +41,7 @@ export const generateTestCases = async (parent) => {
     GENERAL REQUIREMENTS:
     - Return a JSON array of objects.
     - Each object must have: "title", "description", "steps" (array of {stepNumber, action, expectedResult}), "expectedResult".
+    - IMPORTANT: All text content (title, description, action, expectedResult) MUST be in ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}.
     
     Output ONLY valid JSON.
   `;
@@ -66,9 +69,10 @@ export const generateTestCases = async (parent) => {
  * Generates test cases by analyzing a screenshot using Gemini Vision.
  * @param {string} imagePath - Path to the screenshot file
  * @param {string} category - 'happy' or 'unhappy'
+ * @param {string} language - 'vi' or 'en'
  * @returns {Promise<Array>} List of generated test cases
  */
-export const generateTestCasesFromImage = async (imagePath, category) => {
+export const generateTestCasesFromImage = async (imagePath, category, language = 'vi') => {
   const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
   try {
@@ -80,6 +84,7 @@ export const generateTestCasesFromImage = async (imagePath, category) => {
       Based ONLY on what you see in the image, generate a list of detailed test cases for this specific screen.
       
       CATEGORY: ${category.toUpperCase()}
+      OUTPUT LANGUAGE: ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}
 
       CRITICAL REQUIREMENTS BY CATEGORY:
       ${category.toUpperCase() === 'HAPPY' ? `
@@ -98,6 +103,7 @@ export const generateTestCasesFromImage = async (imagePath, category) => {
       - Return a JSON array of objects.
       - Each object must have: "title", "description", "steps" (array of {stepNumber, action, expectedResult}), "expectedResult".
       - Identify buttons, inputs, links, and text elements to derive meaningful actions.
+      - IMPORTANT: All text content (title, description, action, expectedResult) MUST be in ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}.
       
       Output ONLY valid JSON.
     `;
