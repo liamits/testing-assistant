@@ -103,23 +103,18 @@ export const exportProjectTestCases = async (req, res, next) => {
     const testCases = await TestCase.find({ projectId: project._id }).sort({ order: 1, createdAt: 1 }).lean();
 
     const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Test Cases");
     
-    // Group test cases by parent
-    const parentCases = testCases.filter(tc => !tc.parentId);
+    // Group children by category (Happy first, then Unhappy)
+    const happyChildren = testCases.filter(tc => tc.parentId && tc.category === 'happy');
+    const unhappyChildren = testCases.filter(tc => tc.parentId && tc.category === 'unhappy');
     
-    if (parentCases.length === 0) {
-      // If no parents, create a default sheet with all cases
-      const worksheet = workbook.addWorksheet("Test Cases");
-      setupSheet(worksheet, testCases);
-    } else {
-      for (const parent of parentCases) {
-        // Excel sheet names cannot exceed 31 chars and cannot contain certain chars
-        const sheetName = parent.title.substring(0, 31).replace(/[\[\]\?\*\\\/]/g, '');
-        const worksheet = workbook.addWorksheet(sheetName || "Sheet");
-        const children = testCases.filter(tc => tc.parentId?.toString() === parent._id.toString());
-        setupSheet(worksheet, children);
-      }
-    }
+    // If there are no children (only parents), use all test cases
+    const exportData = (happyChildren.length || unhappyChildren.length) 
+      ? [...happyChildren, ...unhappyChildren] 
+      : testCases;
+
+    setupSheet(worksheet, exportData);
 
     const buffer = await workbook.xlsx.writeBuffer();
 
