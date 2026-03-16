@@ -104,7 +104,7 @@ export default function AdminSettingsPage() {
 
   return (
     <AuthGuard>
-      <div className="flex bg-[#0b0e14]">
+      <div className="flex bg-[var(--bg-main)]">
         <Sidebar />
         <div className="flex-1 overflow-y-auto h-screen p-8 max-w-5xl mx-auto space-y-8 animate-fade">
         <header>
@@ -117,7 +117,7 @@ export default function AdminSettingsPage() {
           <aside className="w-full md:w-64 space-y-2">
             <button 
               onClick={() => setActiveTab("general")}
-              className={`w-full flex items-center justify-between p-4 rounded-xl transition-all font-bold ${activeTab === "general" ? "bg-blue-500/20 text-blue-400 border border-blue-500/20" : "text-muted-contrast hover:bg-white/5"}`}
+              className={`w-full flex items-center justify-between p-4 rounded-xl transition-all font-bold ${activeTab === "general" ? "bg-blue-500/20 text-blue-400 border border-blue-500/20" : "text-muted-contrast hover:bg-[var(--border-glass)]"}`}
             >
               <div className="flex items-center gap-3">
                 <Shield size={20} /> {t.tabGeneral}
@@ -158,7 +158,7 @@ export default function AdminSettingsPage() {
                     <button 
                       onClick={() => handleLanguageChange("vi")}
                       disabled={loading}
-                      className={`p-6 rounded-2xl border-2 transition-all flex flex-col gap-2 items-start ${systemLanguage === "vi" ? "border-blue-500 bg-blue-500/10" : "border-white/5 bg-white/5 hover:border-white/10"}`}
+                      className={`p-6 rounded-2xl border-2 transition-all flex flex-col gap-2 items-start ${systemLanguage === "vi" ? "border-blue-500 bg-blue-500/10" : "border-[var(--border-glass)] bg-[var(--bg-card)] hover:border-blue-500/30"}`}
                     >
                       <span className="text-2xl font-bold text-high-contrast">{t.langVi}</span>
                       <span className="text-sm text-muted-contrast uppercase tracking-widest font-bold">{t.default}</span>
@@ -188,7 +188,7 @@ export default function AdminSettingsPage() {
                       type="text" 
                       value={profileData.username}
                       onChange={(e) => setProfileData({...profileData, username: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
                     />
                   </div>
                   <div>
@@ -197,7 +197,7 @@ export default function AdminSettingsPage() {
                       type="email" 
                       value={profileData.email}
                       onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export default function AdminSettingsPage() {
                       type="password" 
                       value={securityData.currentPassword}
                       onChange={(e) => setSecurityData({...securityData, currentPassword: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
                     />
                   </div>
                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -229,7 +229,7 @@ export default function AdminSettingsPage() {
                         type="password" 
                         value={securityData.newPassword}
                         onChange={(e) => setSecurityData({...securityData, newPassword: e.target.value})}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
+                        className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
                       />
                     </div>
                     <div>
@@ -238,7 +238,7 @@ export default function AdminSettingsPage() {
                         type="password" 
                         value={securityData.confirmPassword}
                         onChange={(e) => setSecurityData({...securityData, confirmPassword: e.target.value})}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
+                        className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
                       />
                     </div>
                   </div>

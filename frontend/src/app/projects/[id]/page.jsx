@@ -543,6 +543,7 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           className={`group/step flex gap-3 text-sm p-2 rounded-lg transition-colors items-center ${snapshot.isDragging ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-black/10 hover:bg-white/5'}`}
+                          className={`group/step flex gap-3 text-sm p-2 rounded-lg transition-colors items-center ${snapshot.isDragging ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-black/10 hover:bg-[var(--border-glass)]'}`}
                         >
                           <input 
                             type="checkbox"
@@ -562,7 +563,7 @@ function TestCaseCard({ testCase, allCases, onEdit, onDelete, onGenerateAI, onAd
                           <div className="ml-auto flex items-center gap-1 opacity-0 group-hover/step:opacity-100 transition-opacity">
                             <button 
                               onClick={(e) => { e.stopPropagation(); onEdit(child); }}
-                              className="p-1 hover:bg-white/10 rounded text-blue-400/70 hover:text-blue-400"
+                              className="p-1 hover:bg-[var(--border-glass)] rounded text-blue-400/70 hover:text-blue-400"
                             >
                               <Edit size={12} />
                             </button>

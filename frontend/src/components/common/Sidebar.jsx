@@ -78,7 +78,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 className={`flex items-center gap-3 p-3 rounded-xl transition-all font-medium ${
                   isActive
                     ? "text-blue-400 bg-blue-500/10 border border-blue-500/20 shadow-lg shadow-blue-500/5"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                    : "text-muted-contrast hover:text-high-contrast hover:bg-black/5"
                 }`}
               >
                 <item.icon size={20} /> {item.label}

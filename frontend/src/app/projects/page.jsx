@@ -129,7 +129,7 @@ export default function ProjectsPage() {
               <input 
                 type="text" 
                 placeholder={t.searchPlaceholder}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 md:py-4 pl-12 pr-4 text-high-contrast placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all text-base md:text-lg" 
+                className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-2xl py-3 md:py-4 pl-12 pr-4 text-high-contrast placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all text-base md:text-lg" 
               />
             </div>
             <button className="glass px-6 py-3 sm:py-0 flex items-center gap-2 text-high-contrast font-bold hover:bg-white/10 transition-colors justify-center">
@@ -149,7 +149,7 @@ export default function ProjectsPage() {
                 <div 
                   key={p.id || p._id} 
                   onClick={() => router.push(`/projects/${p.id || p._id}`)}
-                  className="glass p-6 md:p-8 hover:transform hover:-translate-y-1 transition-all duration-300 border-white/5 group hover:border-blue-500/30 cursor-pointer"
+                  className="glass p-6 md:p-8 hover:transform hover:-translate-y-1 transition-all duration-300 border-[var(--border-glass)] group hover:border-blue-500/30 cursor-pointer"
                 >
                   <div className="flex justify-between items-start mb-6">
                     <div className="p-3 md:p-4 bg-blue-500/10 rounded-2xl text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300 shadow-inner">

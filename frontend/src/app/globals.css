@@ -17,12 +17,12 @@
 }
 
 .light {
-  --bg-main: #f8fafc;
+  --bg-main: #f1f5f9;
   --bg-card: #ffffff;
-  --bg-glass: rgba(255, 255, 255, 0.8);
-  --text-high: #0f172a;
-  --text-muted: #64748b;
-  --border-glass: rgba(0, 0, 0, 0.05);
+  --bg-glass: rgba(255, 255, 255, 0.9);
+  --text-high: #000000;
+  --text-muted: #334155;
+  --border-glass: rgba(0, 0, 0, 0.1);
   --sidebar-bg: #ffffff;
 }
 
@@ -216,6 +216,15 @@ body {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-glass);
   border-radius: 16px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.themed-hover:hover {
+  background-color: var(--border-glass);
+}
+
+.themed-border {
+  border: 1px solid var(--border-glass);
 }
 
 .text-high-contrast {

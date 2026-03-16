@@ -34,10 +34,10 @@ export default function CreateProjectModal({ isOpen, onClose, onProjectCreated }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade">
-      <div className="glass w-full max-w-md overflow-hidden shadow-2xl border-white/10 animate-slide">
-        <div className="flex justify-between items-center p-6 border-b border-white/5">
+      <div className="glass w-full max-w-md overflow-hidden shadow-2xl border-[var(--border-glass)] animate-slide">
+        <div className="flex justify-between items-center p-6 border-b border-[var(--border-glass)]">
           <h2 className="text-2xl font-bold text-high-contrast">New Project</h2>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-muted-contrast hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-[var(--border-glass)] rounded-full text-muted-contrast hover:text-high-contrast transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -52,7 +52,7 @@ export default function CreateProjectModal({ isOpen, onClose, onProjectCreated }
                 placeholder="e.g. AHV Holding API"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
+                className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-500"
               />
             </div>
 
@@ -66,7 +66,7 @@ export default function CreateProjectModal({ isOpen, onClose, onProjectCreated }
                 placeholder="https://example.com"
                 value={formData.baseUrl}
                 onChange={(e) => setFormData({ ...formData, baseUrl: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all"
+                className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-500"
               />
             </div>
 
@@ -82,7 +82,7 @@ export default function CreateProjectModal({ isOpen, onClose, onProjectCreated }
           </div>
 
           <div className="flex justify-end gap-4 pt-4">
-            <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl text-muted-contrast hover:text-white transition-colors">
+            <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl text-muted-contrast hover:text-high-contrast transition-colors">
               Cancel
             </button>
             <button

@@ -104,8 +104,8 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade">
-      <div className="glass w-full max-w-2xl overflow-hidden shadow-2xl border-white/10 animate-slide">
-        <div className="flex justify-between items-center p-6 border-b border-white/5">
+      <div className="glass w-full max-w-2xl overflow-hidden shadow-2xl border-[var(--border-glass)] animate-slide">
+        <div className="flex justify-between items-center p-6 border-b border-[var(--border-glass)]">
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg ${category === 'happy' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
               <BrainCircuit size={24} />
@@ -114,7 +114,7 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
               Add {category} Case
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-muted-contrast hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-[var(--border-glass)] rounded-full text-muted-contrast hover:text-high-contrast transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -132,7 +132,7 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
                   placeholder={parentId ? "e.g. Click Login Button" : "e.g. User Login"}
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-600"
+                  className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-500"
                 />
               </div>
 
@@ -154,7 +154,7 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
                     placeholder="e.g. User should be redirected to dashboard"
                     value={formData.expectedResult}
                     onChange={(e) => setFormData({ ...formData, expectedResult: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-600"
+                    className="w-full bg-[var(--bg-card)] border border-[var(--border-glass)] rounded-xl p-3 text-high-contrast focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-500"
                   />
                 </div>
               )}
@@ -165,7 +165,7 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
                 <label className="block text-sm font-bold text-muted-contrast mb-2 uppercase flex items-center gap-2">
                   <Upload size={14} /> Attachment
                 </label>
-                <div className="relative h-[164px] w-full bg-white/5 border-2 border-dashed border-white/10 rounded-xl overflow-hidden group hover:border-blue-500/30 transition-all">
+                <div className="relative h-[164px] w-full bg-[var(--bg-card)] border-2 border-dashed border-[var(--border-glass)] rounded-xl overflow-hidden group hover:border-blue-500/30 transition-all text-muted-contrast">
                   {preview ? (
                     <img src={preview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
@@ -200,13 +200,13 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
           )}
 
           <div className="flex justify-end gap-4 pt-4">
-            <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl text-muted-contrast hover:text-white transition-colors uppercase text-sm font-bold">
+            <button type="button" onClick={onClose} className="px-6 py-2 rounded-xl text-muted-contrast hover:text-high-contrast transition-colors uppercase text-sm font-bold">
               Cancel
             </button>
             <button
               disabled={loading || genLoading}
               type="submit"
-              className="px-6 py-2 rounded-xl text-muted-contrast hover:text-white transition-colors uppercase text-sm font-bold"
+              className="px-6 py-2 rounded-xl text-muted-contrast hover:text-high-contrast transition-colors uppercase text-sm font-bold"
             >
               {loading && !genLoading ? (
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />

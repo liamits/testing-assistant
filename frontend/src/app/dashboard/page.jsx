@@ -93,7 +93,7 @@ export default function DashboardPage() {
             <h2 className="text-xl md:text-2xl font-bold text-high-contrast mb-6 md:mb-8">{t.recentActivity}</h2>
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors gap-4">
+                <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-glass)] hover:bg-[var(--border-glass)] transition-colors gap-4">
                   <div className="flex items-center gap-4 sm:gap-5">
                     <div className={`shrink-0 w-3 h-3 rounded-full shadow-lg ${i === 2 ? 'bg-red-500 shadow-red-500/50' : 'bg-green-500 shadow-green-500/50'}`} />
                     <div>

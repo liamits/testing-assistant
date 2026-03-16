@@ -1,3 +1,7 @@
+import "./globals.css";
+import { Inter } from "next/font/google";
+import { Toaster } from "react-hot-toast";
+import SessionInitializer from "../components/common/SessionInitializer";
 import ThemeWrapper from "../components/common/ThemeWrapper";
 
 const inter = Inter({ subsets: ["latin"] });

@@ -6,8 +6,8 @@ export default function DeleteConfirmationModal({ isOpen, onClose, onConfirm, ti
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade">
-      <div className="glass w-full max-w-md overflow-hidden shadow-2xl border-white/10 animate-slide">
-        <div className="flex justify-between items-center p-6 border-b border-white/5">
+      <div className="glass w-full max-w-md overflow-hidden shadow-2xl border-[var(--border-glass)] animate-slide">
+        <div className="flex justify-between items-center p-6 border-b border-[var(--border-glass)]">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-red-500/10 text-red-400">
               <AlertTriangle size={24} />
@@ -16,7 +16,7 @@ export default function DeleteConfirmationModal({ isOpen, onClose, onConfirm, ti
               {title || "Confirm Delete"}
             </h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-muted-contrast hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-[var(--border-glass)] rounded-full text-muted-contrast hover:text-high-contrast transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -30,7 +30,7 @@ export default function DeleteConfirmationModal({ isOpen, onClose, onConfirm, ti
             <button 
               type="button" 
               onClick={onClose} 
-              className="flex-1 px-6 py-3 rounded-xl bg-white/5 text-muted-contrast hover:text-white hover:bg-white/10 transition-all uppercase text-sm font-bold border border-white/5"
+              className="flex-1 px-6 py-3 rounded-xl bg-[var(--bg-card)] text-muted-contrast hover:text-high-contrast hover:bg-[var(--border-glass)] transition-all uppercase text-sm font-bold border border-[var(--border-glass)]"
             >
               Cancel
             </button>
