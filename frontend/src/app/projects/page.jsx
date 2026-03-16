@@ -18,10 +18,6 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);

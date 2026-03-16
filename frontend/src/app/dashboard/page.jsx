@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "../../lib/store";
+import { FolderKanban, FlaskConical, History, Plus } from "lucide-react";
 import AuthGuard from "../../components/common/AuthGuard";
 import Sidebar from "../../components/common/Sidebar";
 import { useRouter } from "next/navigation";
@@ -10,10 +11,6 @@ export default function DashboardPage() {
   const router = useRouter();
   const [stats, setStats] = useState({ projects: 0, testCases: 0, runs: 0 });
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
 
   return (
     <AuthGuard>
