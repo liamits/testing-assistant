@@ -12,9 +12,44 @@ import Sidebar from "../../components/common/Sidebar";
 import { useAuthStore } from "../../lib/store";
 
 export default function ProjectsPage() {
+  const { logout, systemLanguage } = useAuthStore();
   const router = useRouter();
-  const logout = useAuthStore((state) => state.logout);
   const [projects, setProjects] = useState([]);
+
+  const translations = {
+    vi: {
+      title: "Dự án",
+      createProject: "Tạo dự án mới",
+      searchPlaceholder: "Tìm kiếm dự án theo tên...",
+      filters: "Lọc",
+      scenariosCount: "kịch bản kiểm thử",
+      modified: "Cập nhật",
+      ago: "trước",
+      emptyTitle: "Không tìm thấy dự án",
+      emptySubtitle: "Danh sách dự án của bạn đang trống. Hãy bắt đầu tạo dự án đầu tiên.",
+      initializeProject: "Khởi tạo dự án",
+      editProject: "Chỉnh sửa dự án",
+      deleteProject: "Xóa dự án",
+      loadingText: "Đang tải dữ liệu dự án..."
+    },
+    en: {
+      title: "Projects",
+      createProject: "Create Project",
+      searchPlaceholder: "Search projects by name...",
+      filters: "Filters",
+      scenariosCount: "test scenarios",
+      modified: "Modified",
+      ago: "ago",
+      emptyTitle: "Void Detected",
+      emptySubtitle: "Your project landscape is empty. Let's seed your first testing environment.",
+      initializeProject: "Initialize Project",
+      editProject: "Edit Project",
+      deleteProject: "Delete Project",
+      loadingText: "Crunching project data..."
+    }
+  };
+
+  const t = translations[systemLanguage || 'vi'];
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -80,9 +115,9 @@ export default function ProjectsPage() {
 
       <main className="flex-1 overflow-y-auto p-10">
         <header className="flex justify-between items-center mb-12">
-          <h1 className="text-4xl font-black text-high-contrast tracking-tight">Projects</h1>
+          <h1 className="text-4xl font-black text-high-contrast tracking-tight">{t.title}</h1>
           <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 px-6">
-            <Plus size={20} strokeWidth={3} /> Create Project
+            <Plus size={20} strokeWidth={3} /> {t.createProject}
           </button>
         </header>
 
@@ -92,12 +127,12 @@ export default function ProjectsPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-contrast group-focus-within:text-blue-400 transition-colors" size={20} />
             <input 
               type="text" 
-              placeholder="Search projects by name..." 
+              placeholder={t.searchPlaceholder}
               className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-high-contrast placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all text-lg" 
             />
           </div>
           <button className="glass px-6 flex items-center gap-2 text-high-contrast font-bold hover:bg-white/10 transition-colors">
-            <Filter size={20} /> Filters
+            <Filter size={20} /> {t.filters}
           </button>
         </div>
 
@@ -105,7 +140,7 @@ export default function ProjectsPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 space-y-4">
             <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-            <div className="text-muted-contrast text-lg font-medium">Crunching project data...</div>
+            <div className="text-muted-contrast text-lg font-medium">{t.loadingText}</div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -139,7 +174,7 @@ export default function ProjectsPage() {
                           }}
                           className="w-full text-left px-4 py-3 text-sm text-high-contrast hover:bg-white/5 flex items-center gap-3 transition-colors"
                         >
-                          <Edit size={16} className="text-blue-400" /> Edit Project
+                          <Edit size={16} className="text-blue-400" /> {t.editProject}
                         </button>
                         <button 
                           onClick={(e) => {
@@ -148,7 +183,7 @@ export default function ProjectsPage() {
                           }}
                           className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-colors"
                         >
-                          <Trash2 size={16} /> Delete Project
+                          <Trash2 size={16} /> {t.deleteProject}
                         </button>
                       </div>
                     )}
@@ -162,11 +197,11 @@ export default function ProjectsPage() {
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                     <span className="text-sm text-blue-400 font-bold bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/10">
-                      {p._count?.testCases || 0} Test Scenarios
+                      {p._count?.testCases || 0} {t.scenariosCount}
                     </span>
                   </div>
                   <span className="text-xs text-slate-500 font-semibold italic">
-                    Modified 2h ago
+                    {t.modified} 2h {t.ago}
                   </span>
                 </div>
               </div>
@@ -175,12 +210,12 @@ export default function ProjectsPage() {
                 <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 text-slate-600">
                   <FolderKanban size={40} />
                 </div>
-                <h2 className="text-2xl font-bold text-high-contrast mb-3">Void Detected</h2>
+                <h2 className="text-2xl font-bold text-high-contrast mb-3">{t.emptyTitle}</h2>
                 <p className="text-muted-contrast text-lg mb-10 max-w-md mx-auto">
-                  Your project landscape is empty. Let's seed your first testing environment.
+                  {t.emptySubtitle}
                 </p>
                 <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 px-8 py-4 text-xl">
-                  <Plus size={24} strokeWidth={3} /> Initialize Project
+                  <Plus size={24} strokeWidth={3} /> {t.initializeProject}
                 </button>
               </div>
             )}

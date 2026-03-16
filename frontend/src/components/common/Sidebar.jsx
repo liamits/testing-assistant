@@ -5,19 +5,37 @@ import { useAuthStore } from "../../lib/store";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const logout = useAuthStore((state) => state.logout);
+  const { user, logout, systemLanguage } = useAuthStore();
 
   const handleLogout = () => {
     logout();
     router.push("/login");
   };
 
+  const translations = {
+    vi: {
+      dashboard: "Bảng điều khiển",
+      projects: "Dự án",
+      runs: "Lượt chạy gần đây",
+      settings: "Cài đặt",
+      logout: "Đăng xuất"
+    },
+    en: {
+      dashboard: "Dashboard",
+      projects: "Projects",
+      runs: "Latest Runs",
+      settings: "Settings",
+      logout: "Log Out"
+    }
+  };
+
+  const t = translations[systemLanguage || 'vi'];
+
   const navItems = [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-    { label: "Projects", icon: FolderKanban, href: "/projects" },
-    { label: "Latest Runs", icon: History, href: "/runs" },
-    { label: "Settings", icon: Settings, href: "/admin/settings" },
+    { label: t.dashboard, icon: LayoutDashboard, href: "/dashboard" },
+    { label: t.projects, icon: FolderKanban, href: "/projects" },
+    { label: t.runs, icon: History, href: "/runs" },
+    { label: t.settings, icon: Settings, href: "/admin/settings" },
   ];
 
   return (
@@ -48,7 +66,7 @@ export default function Sidebar() {
         onClick={handleLogout}
         className="flex items-center gap-3 text-red-400 hover:bg-red-400/10 p-3 rounded-xl transition-all font-bold mt-auto w-full text-left"
       >
-        <LogOut size={20} /> Log Out
+        <LogOut size={20} /> {t.logout}
       </button>
     </aside>
   );
