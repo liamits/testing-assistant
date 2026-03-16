@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import api from "./api";
+import { toast } from "react-hot-toast";
 
 export const useAuthStore = create((set) => ({
   user: null,
