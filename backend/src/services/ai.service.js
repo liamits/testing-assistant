@@ -36,6 +36,8 @@ export const generateTestCases = async (parent, language = 'vi') => {
     - Generate ONLY unhappy path scenarios (failures, error states, invalid inputs, edge cases).
     - child test titles MUST end with "failed". Example: "Login failed - wrong password".
     - Do NOT include any successful or happy path scenarios.
+    - FOR FORMS/INPUTS: Generate separate test cases for each individual required field being empty (e.g., if there are email and password fields, create one case for "Empty Email" and one for "Empty Password").
+    - Ensure there is also a "All fields empty" case.
     `}
 
     GENERAL REQUIREMENTS:
@@ -97,6 +99,8 @@ export const generateTestCasesFromImage = async (imagePath, category, language =
       - Generate ONLY unhappy path scenarios (failures, error states, invalid inputs, edge cases).
       - child test titles MUST end with "failed".
       - Do NOT include any successful or happy path scenarios.
+      - FOR FORMS/INPUTS: Generate separate test cases for each individual required field being empty (e.g., if there are email and password fields, create one case for "Empty Email" and one for "Empty Password").
+      - Ensure there is also a "All fields empty" case.
       `}
 
       GENERAL REQUIREMENTS:
