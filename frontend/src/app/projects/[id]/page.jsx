@@ -70,7 +70,8 @@ export default function ProjectDetailsPage() {
 
     const toastId = toast.loading("AI đang quét ảnh...");
     try {
-      const res = await api.post(`/testcases/${tc._id}/generate-ai`);
+      const { systemLanguage } = useAuthStore.getState();
+      const res = await api.post(`/testcases/${tc._id}/generate-ai`, { language: systemLanguage });
       toast.success(res.data.message || "Đã tạo test case thành công!", { id: toastId });
       fetchData();
     } catch (err) {

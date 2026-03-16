@@ -18,12 +18,15 @@ export const generateTestCases = async (parent, language = 'vi') => {
     const prompt = `
     You are a professional QA Engineer. Based on the following business context, generate a list of detailed test cases.
     
+    ### MANDATORY OUTPUT LANGUAGE: ${language === 'vi' ? 'VIETNAMESE (TIẾNG VIỆT)' : 'ENGLISH'}
+    ### ALL FIELDS (TITLE, DESCRIPTION, STEPS, EXPECTED RESULT) MUST BE IN ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}.
+    ### DO NOT USE ANY ENGLISH IF THE OUTPUT LANGUAGE IS VIETNAMESE.
+
     PARENT CONTEXT:
     - Title: ${parent.title}
     - Description: ${parent.description}
     - Business Flow: ${parent.flow}
     - Category: ${parent.category.toUpperCase()}
-    - OUTPUT LANGUAGE: ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}
 
     CRITICAL REQUIREMENTS BY CATEGORY:
     ${parent.category.toUpperCase() === 'HAPPY' ? `
@@ -85,8 +88,11 @@ export const generateTestCasesFromImage = async (imagePath, category, language =
       You are an expert QA Engineer. Analyze the provided screenshot of a web application.
       Based ONLY on what you see in the image, generate a list of detailed test cases for this specific screen.
       
+      ### MANDATORY OUTPUT LANGUAGE: ${language === 'vi' ? 'VIETNAMESE (TIẾNG VIỆT)' : 'ENGLISH'}
+      ### ALL FIELDS (TITLE, DESCRIPTION, STEPS, EXPECTED RESULT) MUST BE IN ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}.
+      ### DO NOT USE ANY ENGLISH IF THE OUTPUT LANGUAGE IS VIETNAMESE.
+
       CATEGORY: ${category.toUpperCase()}
-      OUTPUT LANGUAGE: ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}
 
       CRITICAL REQUIREMENTS BY CATEGORY:
       ${category.toUpperCase() === 'HAPPY' ? `

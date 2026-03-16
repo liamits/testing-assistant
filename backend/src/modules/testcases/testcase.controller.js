@@ -129,7 +129,9 @@ export const bulkDeleteTestCases = async (req, res, next) => {
 export const generateAI = async (req, res, next) => {
   try {
     const { id } = req.params;
-    fs.appendFileSync(path.resolve("tmp/debug_log.txt"), `[${new Date().toISOString()}] POST /api/testcases/${id}/generate-ai\n`);
+    const { language: reqLanguage } = req.body;
+    
+    fs.appendFileSync(path.resolve("tmp/debug_log.txt"), `[${new Date().toISOString()}] POST /api/testcases/${id}/generate-ai | reqLanguage: ${reqLanguage}\n`);
     const tc = await TestCase.findById(id);
     if (!tc) return res.status(404).json({ message: "Test case not found" });
 
@@ -143,9 +145,12 @@ export const generateAI = async (req, res, next) => {
       return res.status(404).json({ message: "Screenshot file not found on server" });
     }
 
-    // Get global system language
+    // Get global system language fallback
     const setting = await SystemSetting.findOne({ key: 'systemLanguage' });
-    const language = setting?.value || 'vi';
+    const fallbackLanguage = setting?.value || 'vi';
+    const language = reqLanguage || fallbackLanguage;
+
+    fs.appendFileSync(path.resolve("tmp/debug_log.txt"), `[DEBUG] Final generation language: ${language}\n`);
 
     // Generate test cases from image
     const childrenData = await generateTestCasesFromImage(imagePath, tc.category, language);
