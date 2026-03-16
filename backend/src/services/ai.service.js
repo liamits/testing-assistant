@@ -113,8 +113,12 @@ export const generateTestCasesFromImage = async (imagePath, category, language =
       - Return a JSON array of objects.
       - Each object must have: "title", "description", "steps" (array of {stepNumber, action, expectedResult}), "expectedResult".
       - Identify buttons, inputs, links, and text elements to derive meaningful actions.
-      - IMPORTANT: All text content (title, description, action, expectedResult) MUST be in ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}.
       
+      ### FINAL MANDATORY INSTRUCTION:
+      - YOU MUST WRITE EVERYTHING IN ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}.
+      - ${language === 'vi' ? 'DO NOT USE ENGLISH WORDS LIKE "Successful", "Failed", "Click", "Enter", "Button". USE VIETNAMESE EQUIVALENTS INSTEAD.' : 'DO NOT USE VIETNAMESE.'}
+      - ${language === 'vi' ? 'IF YOU USE ENGLISH, THE TEST SUITE WILL BREAK. BE 100% VIETNAMESE.' : ''}
+
       Output ONLY valid JSON.
     `;
 

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { X, Upload, FileText, Plus, BrainCircuit } from "lucide-react";
 import api from "../../lib/api";
 import { toast } from "react-hot-toast";
+import { useAuthStore } from "../../lib/store";
 
 export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, projectId, category, parentId = null }) {
   const [loading, setLoading] = useState(false);
@@ -83,7 +84,8 @@ export default function AddTestCaseModal({ isOpen, onClose, onTestCaseCreated, p
       // 2. Trigger AI generation
       if (file) {
         toast.loading("Đang tạo test case con bằng AI...", { id: "ai-gen" });
-        await api.post(`/testcases/${newTestCase._id}/generate-ai`);
+        const { systemLanguage } = useAuthStore.getState();
+        await api.post(`/testcases/${newTestCase._id}/generate-ai`, { language: systemLanguage });
         toast.success("Đã tạo test case cha và con thành công!", { id: "ai-gen" });
       } else {
         toast.success("Đã tạo test case cha! (Không có ảnh để quét AI)");
