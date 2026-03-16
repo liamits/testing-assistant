@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, Plus, Play, CheckCircle, AlertCircle, Trash2, Edit, Save, BrainCircuit, FileSpreadsheet, ChevronRight, FileText, GripVertical, Download, LogOut } from "lucide-react";
+import { ChevronLeft, Plus, Play, CheckCircle, AlertCircle, Trash2, Edit, Save, BrainCircuit, FileSpreadsheet, ChevronRight, FileText, GripVertical, Download, LogOut, Languages } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import api from "../../../lib/api";
 import { toast } from "react-hot-toast";
@@ -124,6 +124,25 @@ export default function ProjectDetailsPage() {
     }
   };
 
+  const handleTranslateProject = async () => {
+    const { systemLanguage } = useAuthStore.getState();
+    const confirmMsg = systemLanguage === 'vi' 
+      ? "Bạn có chắc muốn dịch toàn bộ test case sang Tiếng Việt? AI sẽ tự động cập nhật lại tiêu đề và các bước."
+      : "Are you sure you want to translate all test cases to English? AI will automatically update titles and steps.";
+    
+    if (!window.confirm(confirmMsg)) return;
+
+    const toastId = toast.loading(systemLanguage === 'vi' ? "Đang dịch toàn bộ dự án..." : "Translating project...");
+    try {
+      const res = await api.post(`/projects/${id}/translate`, { language: systemLanguage });
+      toast.success(res.data.message || "Đã dịch thành công!", { id: toastId });
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Lỗi khi dịch dự án", { id: toastId });
+    }
+  };
+
   const handleExportExcel = async (category = null) => {
     const toastId = toast.loading("Đang chuẩn bị file Excel...");
     try {
@@ -238,6 +257,12 @@ export default function ProjectDetailsPage() {
             <div className="flex flex-wrap gap-3 md:gap-4">
               <button onClick={handleDelete} className="px-3 md:px-4 py-2 rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-colors flex items-center gap-2 font-bold uppercase text-[10px] md:text-sm border border-red-500/20 md:border-none">
                 <Trash2 size={18} /> Delete Project
+              </button>
+              <button 
+                onClick={handleTranslateProject} 
+                className="flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors flex items-center justify-center gap-2 font-bold uppercase text-[10px] md:text-sm border border-blue-500/30"
+              >
+                <Languages size={18} /> Translate All
               </button>
               <button 
                 onClick={handleExportExcel} 

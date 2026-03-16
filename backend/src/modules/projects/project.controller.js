@@ -4,6 +4,7 @@ import { TestRun } from "../../models/TestRun.js";
 import ExcelJS from "exceljs";
 import path from "path";
 import fs from "fs";
+import { translateTestCases } from "../../services/ai.service.js";
 
 export const getProjects = async (req, res, next) => {
   try {
@@ -97,6 +98,43 @@ export const deleteProject = async (req, res, next) => {
   }
 };
 
+export const translateProjectTestCases = async (req, res, next) => {
+  try {
+    const { language } = req.body;
+    const project = await Project.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!project) return res.status(404).json({ message: "Project not found" });
+
+    const testCases = await TestCase.find({ projectId: project._id }).lean();
+    if (testCases.length === 0) return res.json({ message: "No test cases to translate" });
+
+    // Translate in batches to avoid token limits or use AI service safely
+    const translatedData = await translateTestCases(testCases, language || 'vi');
+
+    // Bulk update database
+    const bulkOps = translatedData.map(item => ({
+      updateOne: {
+        filter: { _id: item.id },
+        update: {
+          title: item.title,
+          description: item.description,
+          steps: item.steps,
+          expectedResult: item.expectedResult
+        }
+      }
+    }));
+
+    if (bulkOps.length > 0) {
+      await TestCase.bulkWrite(bulkOps);
+    }
+
+    res.json({ message: `Successfully translated ${translatedData.length} test cases to ${language === 'vi' ? 'Vietnamese' : 'English'}.` });
+  } catch (err) {
+    console.error("Project translation error:", err);
+    if (typeof next === "function") next(err);
+    else res.status(500).json({ message: err.message });
+  }
+};
+
 export const exportProjectTestCases = async (req, res, next) => {
   try {
     const { category } = req.query;
@@ -123,9 +161,13 @@ export const exportProjectTestCases = async (req, res, next) => {
 
     const worksheet = workbook.getWorksheet(1) || workbook.addWorksheet("Test Cases");
     
+    // Create a set of IDs for all test cases in this project for quick lookups
+    const tcIds = new Set(testCases.map(tc => tc._id.toString()));
+
     // Group children by category (Happy first, then Unhappy)
-    const happyChildren = testCases.filter(tc => tc.parentId && tc.category === 'happy');
-    const unhappyChildren = testCases.filter(tc => tc.parentId && tc.category === 'unhappy');
+    // Robust Filter: Only include children whose parentId exists in this project
+    const happyChildren = testCases.filter(tc => tc.parentId && tc.category === 'happy' && tcIds.has(tc.parentId.toString()));
+    const unhappyChildren = testCases.filter(tc => tc.parentId && tc.category === 'unhappy' && tcIds.has(tc.parentId.toString()));
     
     // If there are no children (only parents), use all test cases
     const exportData = (happyChildren.length || unhappyChildren.length) 

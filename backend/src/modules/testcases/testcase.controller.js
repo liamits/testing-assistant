@@ -103,8 +103,13 @@ export const updateTestCase = async (req, res, next) => {
 
 export const deleteTestCase = async (req, res, next) => {
   try {
-    const result = await TestCase.findByIdAndDelete(req.params.id);
+    const id = req.params.id;
+    const result = await TestCase.findByIdAndDelete(id);
     if (!result) return res.status(404).json({ message: "Not found" });
+    
+    // Cascading delete: Remove all children
+    await TestCase.deleteMany({ parentId: id });
+    
     res.json({ message: "Deleted" });
   } catch (err) {
     if (typeof next === "function") next(err);
@@ -119,7 +124,11 @@ export const bulkDeleteTestCases = async (req, res, next) => {
       return res.status(400).json({ message: "IDs must be an array" });
     }
     const result = await TestCase.deleteMany({ _id: { $in: ids } });
-    res.json({ message: `Deleted ${result.deletedCount} test cases` });
+    
+    // Cascading delete: Remove all children of these IDs
+    await TestCase.deleteMany({ parentId: { $in: ids } });
+    
+    res.json({ message: `Deleted ${result.deletedCount} test cases and their children` });
   } catch (err) {
     if (typeof next === "function") next(err);
     else res.status(500).json({ message: err.message });

@@ -3,7 +3,7 @@ import { authMiddleware } from "../../middleware/auth.middleware.js";
 import {
   getProjects, getProject,
   createProject, updateProject, deleteProject,
-  exportProjectTestCases
+  exportProjectTestCases, translateProjectTestCases
 } from "./project.controller.js";
 
 
@@ -13,6 +13,7 @@ router.use(authMiddleware);
 router.get("/", getProjects);
 router.get("/:id", getProject);
 router.get("/:id/export", exportProjectTestCases);
+router.post("/:id/translate", translateProjectTestCases);
 router.post("/", createProject);
 router.put("/:id", updateProject);
 router.delete("/:id", deleteProject);
