@@ -30,3 +30,5 @@
 [DEBUG] Final generation language: en
 [2026-03-16T03:23:15.865Z] POST /api/testcases/69b7776fc1252093e08fcb54/generate-ai | reqLanguage: vi
 [DEBUG] Final generation language: vi
+[2026-03-16T03:27:21.532Z] POST /api/testcases/69b778998f8c0c5d1f83241a/generate-ai | reqLanguage: vi
+[DEBUG] Final generation language: vi

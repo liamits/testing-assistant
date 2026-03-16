@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Plus, ChevronRight, FileText, CheckCircle, AlertCircle, Play, Trash2, Edit, BrainCircuit, GripVertical, Download, LogOut } from "lucide-react";
+import { ChevronLeft, Plus, Play, CheckCircle, AlertCircle, Trash2, Edit, Save, BrainCircuit, FileSpreadsheet, ChevronRight, FileText, GripVertical, Download, LogOut } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import api from "../../../lib/api";
 import { toast } from "react-hot-toast";
@@ -108,7 +108,6 @@ export default function ProjectDetailsPage() {
       console.error("Delete error:", err);
       toast.error(`Failed to delete ${deleteTarget.type}`);
     } finally {
-      setDeleteLoading(true); // Wait, should be false? Fix it while it's here
       setDeleteLoading(false);
     }
   };
@@ -125,14 +124,15 @@ export default function ProjectDetailsPage() {
     }
   };
 
-  const handleExportExcel = async () => {
+  const handleExportExcel = async (category = null) => {
     const toastId = toast.loading("Đang chuẩn bị file Excel...");
     try {
-      const response = await api.get(`/projects/${id}/export`, {
+      const url = `/projects/${id}/export${category ? `?category=${category}` : ''}`;
+      const response = await api.get(url, {
         responseType: 'blob',
       });
       
-      let fileName = `Testcases_${(project?.name || 'Project')}.xlsx`.replace(/\s+/g, '_');
+      let fileName = `Testcases_${(project?.name || 'Project')}${category ? `_${category}` : ''}.xlsx`.replace(/\s+/g, '_');
       const contentDisposition = response.headers['content-disposition'];
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="?([^";]+)"?/);
@@ -140,9 +140,9 @@ export default function ProjectDetailsPage() {
       }
 
       const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = window.URL.createObjectURL(blob);
+      const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
+      link.href = downloadUrl;
       link.download = fileName;
       document.body.appendChild(link);
       link.click();
@@ -259,12 +259,21 @@ export default function ProjectDetailsPage() {
               <h2 className="text-xl font-bold flex items-center gap-2 text-green-400">
                 <CheckCircle size={20} /> Happy Cases
               </h2>
-              <button 
-                onClick={() => openModal("happy")}
-                className="p-2 hover:bg-white/5 rounded-lg text-muted-contrast transition-colors"
-              >
-                <Plus size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleExportExcel("happy")}
+                  title="Xuất Happy Cases sang Excel"
+                  className="p-2 hover:bg-white/5 rounded-lg text-green-400/70 hover:text-green-400 transition-colors"
+                >
+                  <FileSpreadsheet size={20} />
+                </button>
+                <button 
+                  onClick={() => openModal("happy")}
+                  className="p-2 hover:bg-white/5 rounded-lg text-muted-contrast transition-colors"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
             </div>
             
             <StrictModeDroppable droppableId="happy" type="testcase">
@@ -313,12 +322,21 @@ export default function ProjectDetailsPage() {
               <h2 className="text-xl font-bold flex items-center gap-2 text-red-400">
                 <AlertCircle size={20} /> Unhappy Cases
               </h2>
-              <button 
-                onClick={() => openModal("unhappy")}
-                className="p-2 hover:bg-white/5 rounded-lg text-muted-contrast transition-colors"
-              >
-                <Plus size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleExportExcel("unhappy")}
+                  title="Xuất Unhappy Cases sang Excel"
+                  className="p-2 hover:bg-white/5 rounded-lg text-red-400/70 hover:text-red-400 transition-colors"
+                >
+                  <FileSpreadsheet size={20} />
+                </button>
+                <button 
+                  onClick={() => openModal("unhappy")}
+                  className="p-2 hover:bg-white/5 rounded-lg text-muted-contrast transition-colors"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
             </div>
 
             <StrictModeDroppable droppableId="unhappy" type="testcase">

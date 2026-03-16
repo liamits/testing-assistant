@@ -99,10 +99,16 @@ export const deleteProject = async (req, res, next) => {
 
 export const exportProjectTestCases = async (req, res, next) => {
   try {
+    const { category } = req.query;
     const project = await Project.findOne({ _id: req.params.id, userId: req.user.id }).lean();
     if (!project) return res.status(404).json({ message: "Project not found" });
 
-    const testCases = await TestCase.find({ projectId: project._id }).sort({ order: 1, createdAt: 1 }).lean();
+    let testCaseQuery = { projectId: project._id };
+    if (category) {
+      testCaseQuery.category = category;
+    }
+
+    const testCases = await TestCase.find(testCaseQuery).sort({ order: 1, createdAt: 1 }).lean();
 
     const templatePath = path.resolve("../frontend/document/testcasse.xlsx");
     
@@ -130,7 +136,8 @@ export const exportProjectTestCases = async (req, res, next) => {
 
     const buffer = await workbook.xlsx.writeBuffer();
 
-    const filename = `Testcases_${project.name.replace(/\s+/g, '_')}.xlsx`;
+    const catSuffix = category ? `_${category.charAt(0).toUpperCase() + category.slice(1)}` : '';
+    const filename = `Testcases_${project.name.replace(/\s+/g, '_')}${catSuffix}.xlsx`;
     const encodedFilename = encodeURIComponent(filename).replace(/['()]/g, escape).replace(/\*/g, '%2A');
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
